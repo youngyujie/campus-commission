@@ -1,0 +1,21 @@
+const { chromium } = require('playwright-core')
+const path = require('path')
+const FILE = 'file://' + path.resolve(__dirname, '../校园委托-单文件版.html')
+;(async () => {
+  const b = await chromium.launch({ channel: 'msedge', headless: true })
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 } })
+  const p = await ctx.newPage()
+  await p.goto(FILE, { waitUntil: 'networkidle' })
+  await p.evaluate(() => localStorage.clear())
+  await p.reload({ waitUntil: 'networkidle' })
+  await p.waitForTimeout(1200)
+  await p.getByText('林小满', { exact: true }).first().click()
+  await p.waitForTimeout(1400)
+  const tasks = await p.evaluate(() => {
+    const raw = JSON.parse(localStorage.getItem('campus_commission_state_v2'))
+    const st = raw && raw.data ? raw.data : raw
+    return (st.tasks || []).map(t => ({ title: t.title, place: t.place, building: t.building, category: t.category }))
+  })
+  console.log(JSON.stringify(tasks, null, 2))
+  await b.close()
+})().catch(e => { console.error(e); process.exit(1) })

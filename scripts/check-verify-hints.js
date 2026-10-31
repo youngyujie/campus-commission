@@ -1,0 +1,41 @@
+const { chromium } = require('playwright-core')
+const path = require('path')
+const FILE = 'file://' + path.resolve(__dirname, '../校园委托-单文件版.html')
+const ok = (c, m) => console.log((c ? 'OK ' : 'XX ') + m)
+;(async () => {
+  const b = await chromium.launch({ channel: 'msedge', headless: true })
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+  const p = await ctx.newPage()
+  const errs = []
+  p.on('pageerror', e => errs.push(String(e)))
+  await p.goto(FILE, { waitUntil: 'networkidle' })
+  await p.evaluate(() => localStorage.clear())
+  await p.reload({ waitUntil: 'networkidle' })
+  await p.waitForTimeout(1200)
+  // 受限账号：许一帆（未认证）
+  await p.getByText('许一帆', { exact: true }).first().click()
+  await p.waitForTimeout(1400)
+  await p.goto(FILE + '#/pages/verify/verify')
+  await p.waitForTimeout(1000)
+
+  const body = await p.evaluate(() => document.body.innerText)
+  console.log('--- verify page ---\n' + body.replace(/\n+/g, ' | ').slice(0, 500))
+  ok(body.includes('演示答案'), '认证页显示「演示答案」提示卡')
+  ok(body.includes('演示大学'), '提示卡包含学校「演示大学」')
+  ok(/11010519491231002X/.test(body), '提示卡包含合法演示身份证')
+  ok(/2024\d{6}/.test(body), '提示卡包含演示学号')
+
+  ok(body.includes('演示学号：'), '学号输入框占位提示含演示学号')
+  ok(body.includes('演示身份证：'), '身份证输入框占位提示含演示身份证')
+  ok(body.includes('演示学校：') && body.includes('演示姓名：'), '学校/姓名占位提示也已给出')
+
+  // 一键填入并提交
+  await p.getByText('一键填入', { exact: true }).click()
+  await p.waitForTimeout(500)
+  await p.getByText('提交认证', { exact: true }).click()
+  await p.waitForTimeout(1000)
+  const after = await p.evaluate(() => document.body.innerText)
+  ok(after.includes('已完成学生认证'), '一键填入后提交成功，显示已完成认证')
+  ok(errs.length === 0, '无 JS 报错' + (errs.length ? '：' + errs[0] : ''))
+  await b.close()
+})().catch(e => { console.error(e); process.exit(1) })
