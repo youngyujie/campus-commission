@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>传智杯 · 参赛材料与演示流程（校园委托）</title>
+<style>
+  :root{
+    --ink:#111827; --ink2:#374151; --muted:#6b7280; --line:#e5e7eb;
+    --blue:#2563eb; --blue-soft:#eff6ff; --mint:#0f9d7f; --mint-soft:#e8faf4;
+    --amber:#b45309; --amber-soft:#fffbeb; --red:#b91c1c; --red-soft:#fef2f2;
+    --bg:#f6f7f9;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.7; font-size:15px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{max-width:920px;margin:0 auto;padding:40px 28px 80px;}
+  header.cover{
+    background:linear-gradient(135deg,#1d4ed8,#2563eb 55%,#3b82f6);
+    color:#fff;border-radius:20px;padding:34px 32px;margin-bottom:26px;
+    box-shadow:0 18px 40px -18px rgba(37,99,235,.55);
+  }
+  header.cover .kicker{font-size:13px;letter-spacing:.18em;opacity:.85;margin:0 0 8px;}
+  header.cover h1{margin:0;font-size:30px;line-height:1.25;letter-spacing:-.01em;}
+  header.cover p{margin:12px 0 0;font-size:14px;opacity:.92;max-width:60ch;}
+  header.cover .meta{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;}
+  header.cover .meta span{
+    font-size:12px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);
+    padding:4px 10px;border-radius:999px;
+  }
+  section{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px 28px;margin-bottom:20px;}
+  h2{font-size:20px;margin:0 0 6px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px;}
+  h2 .n{
+    display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
+    border-radius:8px;background:var(--blue-soft);color:var(--blue);font-size:14px;font-weight:800;flex:none;
+  }
+  .sub{color:var(--muted);font-size:13.5px;margin:0 0 16px;}
+  h3{font-size:16px;margin:22px 0 8px;}
+  h3:first-of-type{margin-top:6px;}
+  p{margin:8px 0;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f9fafb;font-weight:700;color:var(--ink2);white-space:nowrap;}
+  td code, p code, li code{
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+    background:#f3f4f6;padding:1px 6px;border-radius:4px;color:#1f2937;
+  }
+  .tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px;line-height:1.6;}
+  .tag.ok{background:var(--mint-soft);color:var(--mint);}
+  .tag.part{background:var(--amber-soft);color:var(--amber);}
+  .tag.todo{background:var(--red-soft);color:var(--red);}
+  ul,ol{margin:8px 0;padding-left:22px;}
+  li{margin:5px 0;}
+  .callout{border-radius:12px;padding:14px 16px;margin:14px 0;font-size:13.5px;line-height:1.65;}
+  .callout.info{background:var(--blue-soft);border:1px solid #bfdbfe;color:#1e40af;}
+  .callout.warn{background:var(--amber-soft);border:1px solid #fde68a;color:#92400e;}
+  .callout.mint{background:var(--mint-soft);border:1px solid #86e0c9;color:#0b6b57;}
+  .timeline{margin:14px 0;border-left:3px solid #dbeafe;padding-left:0;}
+  .tl{position:relative;padding:0 0 18px 22px;}
+  .tl::before{content:"";position:absolute;left:-7px;top:5px;width:11px;height:11px;border-radius:50%;background:var(--blue);border:3px solid #fff;box-shadow:0 0 0 2px #dbeafe;}
+  .tl .t{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;font-weight:700;color:var(--blue);}
+  .tl .h{font-weight:700;margin:2px 0 4px;}
+  .tl .d{font-size:13.5px;color:var(--ink2);}
+  .tl .d b{color:var(--ink);}
+  .prompt{
+    background:#0f172a;color:#e2e8f0;border-radius:12px;padding:14px 16px;margin:10px 0;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.7;white-space:pre-wrap;
+  }
+  .prompt .lbl{display:block;color:#7dd3fc;font-weight:700;margin-bottom:6px;font-size:11.5px;letter-spacing:.06em;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .box{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fbfcfe;}
+  .box h4{margin:0 0 6px;font-size:14px;}
+  .box p,.box li{font-size:13px;color:var(--ink2);}
+  .check{list-style:none;padding-left:0;}
+  .check li{position:relative;padding-left:26px;margin:7px 0;font-size:13.5px;}
+  .check li::before{content:"☐";position:absolute;left:0;top:-1px;font-size:16px;color:var(--muted);}
+  .foot{color:var(--muted);font-size:12.5px;text-align:center;margin-top:26px;}
+  @media (max-width:720px){
+    .page{padding:20px 14px 60px;}
+    .grid2{grid-template-columns:1fr;}
+    header.cover h1{font-size:23px;}
+  }
+  @media print{
+    body{background:#fff;}
+    .page{max-width:none;padding:0;}
+    section{break-inside:avoid;box-shadow:none;}
+    header.cover{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .tag,.callout,.prompt,.box,.tl::before{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="cover">
+    <p class="kicker">传智杯 · 作品提交</p>
+    <h1>校园委托 —— 参赛材料清单与演示流程</h1>
+    <p>一个面向校园的轻量任务委托平台（发单 · 接单 · 押金 · 验收 · 评价 · 仲裁），全程以「人与 AI 协作」的方式从零搭建并上线。本文档把赛道要求逐条拆解，并给出可直接照做的演示视频脚本与材料准备清单。</p>
+    <div class="meta">
+      <span>技术栈：uni-app + Vue 3 + Vite</span>
+      <span>构建：单文件 HTML / H5</span>
+      <span>后端：Node 原生 http + JSON</span>
+      <span>演示账号：林小满 / 许一帆 / 张老师</span>
+    </div>
+  </header>
+
+  <!-- 1 -->
+  <section>
+    <h2><span class="n">1</span>赛道要求逐条解读 + 现状对照</h2>
+    <p class="sub">先看清「必须交什么、怎么交、我们的项目现在到哪一步」。</p>
+    <table>
+      <tr><th>要求</th><th>具体内容</th><th>我们现状</th></tr>
+      <tr>
+        <td><b>代码仓库</b></td>
+        <td>GitHub / Gitee，必须 <b>Public</b> 或提供评审访问权限</td>
+        <td><span class="tag part">待办</span> 项目在本地，需推到公开仓库</td>
+      </tr>
+      <tr>
+        <td><b>细粒度 Git 提交</b></td>
+        <td>保留完整提交历史，<b>禁止一次性 initial commit 包含全部功能</b>；每次提交对应一次 AI 对话或一个功能模块</td>
+        <td><span class="tag todo">重点补</span> 需按功能模块拆分提交（见 §2 建议）</td>
+      </tr>
+      <tr>
+        <td><b>AI 对话 / Prompt 快照</b></td>
+        <td>导出与 AI 的对话历史；不支持导出可截图/录屏；<b>至少 3 个核心功能迭代的完整 Prompt 链</b>（你的提问 + AI 建议 + 你如何引导修 Bug）</td>
+        <td><span class="tag ok">已具备素材</span> 本次协作过程可整理成快照（见 §5）</td>
+      </tr>
+      <tr>
+        <td><b>README 复现指南</b></td>
+        <td>10 分钟极速复现：环境配置、依赖清单、环境变量模板</td>
+        <td><span class="tag part">部分具备</span> 已有项目 README，需补「10 分钟复现」章节（见 §7）</td>
+      </tr>
+      <tr>
+        <td><b>演示视频</b></td>
+        <td>5–8 分钟，MP4 1080p；除功能演示外，<b>必须含至少 2 分钟「AI 协同过程复现」</b></td>
+        <td><span class="tag todo">待录制</span> 脚本见 §3、§4</td>
+      </tr>
+      <tr>
+        <td><b>技术文档</b></td>
+        <td>PDF，≤30 页；重点：意图控制策略、架构设计、可复现性论证</td>
+        <td><span class="tag todo">待撰写</span> 大纲见 §6</td>
+      </tr>
+    </table>
+    <div class="callout info">
+      <b>一句话结论：</b>项目本体已经跑通并上线，缺的是「把过程材料化」——公开仓库 + 拆分提交 + Prompt 快照 + 复现指南 + 视频 + 技术文档。视频和文档的脚本/大纲本文档已经写好，照着做即可。
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section>
+    <h2><span class="n">2</span>材料清单（提交前逐项打勾）</h2>
+    <p class="sub">按截止时间倒排，建议先做「仓库 + 提交历史」，因为它是其他材料的地基。</p>
+    <ul class="check">
+      <li><b>公开代码仓库</b>：GitHub/Gitee 建仓 → 推代码 → 设为 Public（或给评审开权限）</li>
+      <li><b>细粒度提交</b>：把「配色统一 / 导航动效 / 大厅分区滚动联动 / 发布页 Bug 修复」等拆成独立 commit，每个 commit message 写清「对应哪次 AI 对话 / 哪个模块」</li>
+      <li><b>Prompt 快照</b>：从对话记录里导出/截图至少 3 个核心迭代（本文档 §5 已整理成可直接引用的文字版）</li>
+      <li><b>README.md</b>：补「10 分钟极速复现」章节（本文档 §7 可直接粘贴）</li>
+      <li><b>演示视频</b>：按 §3 脚本录 5–8 分钟 1080p，含 §4 的 2 分钟 AI 协同段</li>
+      <li><b>技术文档 PDF</b>：按 §6 大纲写，≤30 页，导出 PDF</li>
+      <li><b>提交前自检</b>：按 §8 清单过一遍</li>
+    </ul>
+  </section>
+
+  <!-- 3 -->
+  <section>
+    <h2><span class="n">3</span>演示视频流程（约 7 分 30 秒）</h2>
+    <p class="sub">总时长控制在 5–8 分钟。建议 1080p 录屏 + 麦克风讲解；提前把演示账号数据准备好，避免现场卡顿。</p>
+
+    <div class="timeline">
+      <div class="tl">
+        <div class="t">00:00 – 00:20</div>
+        <div class="h">开场：一句话讲清项目</div>
+        <div class="d">画面：标题页 / 项目 Logo。台词：「这是『校园委托』，一个面向本校学生的小额互助平台——发一条委托，自由接单，押金保障，信用沉淀。它从零到上线，全程由我和 AI 协作完成。」</div>
+      </div>
+      <div class="tl">
+        <div class="t">00:20 – 00:50</div>
+        <div class="h">登录与账号体系</div>
+        <div class="d">操作：打开线上链接 → 登录页 → 点演示账号「林小满」直接进入。台词：说明手机号/密码登录、演示账号、以及「认证学生才能发单接单」的规则。</div>
+      </div>
+      <div class="tl">
+        <div class="t">00:50 – 01:50</div>
+        <div class="h">电脑端大厅：导航联动是重点</div>
+        <div class="d">操作：滚动页面 → 顶部吸顶导航变白/加阴影/变矮；<b>滚到哪个分类，指示条就平滑滑到哪个标签</b>；<b>点标签，页面平滑滚到对应分区</b>；鼠标悬停委托卡轻微上浮。台词：把「滚动联动」这个亮点讲透（这是最容易加分的交互细节）。</div>
+      </div>
+      <div class="tl">
+        <div class="t">01:50 – 02:30</div>
+        <div class="h">发布一条委托（核心业务）</div>
+        <div class="d">操作：点「＋ 发布」→ 选类型（代取代买）→ 填标题/地点/报酬/截止 → 提交。台词：讲表单校验、报酬上限、押金规则、违规词拦截。</div>
+      </div>
+      <div class="tl">
+        <div class="t">02:30 – 03:10</div>
+        <div class="h">订单流转 + 个人中心</div>
+        <div class="d">操作：进「我的订单」看状态（待接单→已接单→待验收→已完成）；进「我的」看立体卡片、按钮按下反馈。台词：讲完整闭环与交互质感。</div>
+      </div>
+      <div class="tl">
+        <div class="t">03:10 – 03:50</div>
+        <div class="h">手机端适配</div>
+        <div class="d">操作：手机打开同一链接 → 底部悬浮胶囊导航、<b>浅薄荷绿椭圆胶囊</b>选中、卡片点按上浮。台词：讲双端一致、移动端导航的胶囊滑动。</div>
+      </div>
+      <div class="tl">
+        <div class="t">03:50 – 05:50</div>
+        <div class="h">AI 协同过程复现（≥2 分钟，评分关键）</div>
+        <div class="d">详见 §4。这一段单独按脚本演，展示「你怎么提需求、AI 怎么给方案、你怎么约束、怎么修 Bug」。</div>
+      </div>
+      <div class="tl">
+        <div class="t">05:50 – 06:40</div>
+        <div class="h">技术架构速讲</div>
+        <div class="d">操作：切到代码/架构图。台词：uni-app + Vue3 单文件构建、组件化、store 状态层、sync 同步层、Node 后端；强调「AI 生成代码后我用什么边界约束它」。</div>
+      </div>
+      <div class="tl">
+        <div class="t">06:40 – 07:20</div>
+        <div class="h">10 分钟极速复现</div>
+        <div class="d">操作：<code>git clone</code> → <code>npm install</code> → <code>npm run dev:h5</code> → 打开本地地址；或 <code>npm run build:single</code> 出单文件双击即开。台词：强调「零配置、可复现」。</div>
+      </div>
+      <div class="tl">
+        <div class="t">07:20 – 07:30</div>
+        <div class="h">收尾</div>
+        <div class="d">台词：一句话总结「人定方向与边界，AI 负责落地，过程可追溯、结果可复现」。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section>
+    <h2><span class="n">4</span>「AI 协同过程复现」段脚本（03:50 – 05:50）</h2>
+    <p class="sub">赛道明确要求「至少 2 分钟」。建议用「一正一修」两段：一段展示用 Prompt 生成核心模块，一段展示引导 AI 修一个顽固 Bug。</p>
+
+    <h3>4.1 用 Prompt 生成核心模块（约 70 秒）</h3>
+    <p>屏幕展示：把下面这段 Prompt 原样输入 AI，然后展示 AI 返回的方案与生成的代码（<code>hall.vue</code> 的分类分区、滑动指示条、滚动联动逻辑）。</p>
+    <div class="prompt"><span class="lbl">PROMPT · 大厅改版</span>把大厅改成「分类分区 + 滚动联动」：
+1）列表按分类分成多个区块，每个区块有标题和条数；
+2）顶部是一条吸顶导航，分类标签下面有一条滑动指示条；
+3）页面滚动到哪个区块，指示条就平滑滑到对应标签；
+4）点击标签，页面平滑滚动到对应区块；
+5）动效统一 ease-out、300ms，简约干净，禁止弹跳/回弹。
+只用真实数据，不要改数据层。</div>
+    <p>讲解要点：<b>你如何约束</b>——「只改 pages/components、不动 utils/store.js」；<b>AI 如何落地</b>——它新建了 <code>sections</code> 分组、<code>.topbar-ind</code> 滑动条、<code>updateActiveByScroll()</code> 滚动联动、<code>uni.pageScrollTo</code> 点击滚动。</p>
+
+    <h3>4.2 引导 AI 修一个顽固 Bug（约 50 秒）</h3>
+    <p>屏幕展示：先演示 Bug（切到发布页导航消失、退出后导航点不动），再贴出下面这段「Bug 描述 Prompt」，然后展示 AI 的定位与修复。</p>
+    <div class="prompt"><span class="lbl">PROMPT · Bug 修复</span>发现两个 bug：
+1）底部导航切到「发布」时，导航栏会消失；
+2）从发布页退出后，底部导航卡住、点不动。
+我要的效果：点发布时底部导航不消失；发布页的「发布订单」按钮原本固定在底部，现在要和其他内容一样随滚动移动；离开发布后导航也能正常点。</div>
+    <p>讲解要点（体现「引导」而非「甩锅」）：AI 先定位根因——<b>发布页没有挂载底部导航组件</b>，且导航内部有个「跳转中」的锁在 <code>navigateTo</code> 后没有复位，旧页面残留在栈里导致锁死。修复：给发布页补上导航、按钮改成随内容滚动、导航跳转统一用 <code>reLaunch</code> 并在回调里复位锁。最后现场验证「大厅↔发布↔我的」来回切换正常。</p>
+    <div class="callout mint">
+      <b>录制技巧：</b>把 Prompt 用大字号贴出来、让观众看清「你输入了什么」；AI 返回后不要全屏滚代码，用鼠标圈出关键函数名（如 <code>updateActiveByScroll</code>、<code>reLaunch</code>），再口述一句「我为什么要这样约束它」。
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section>
+    <h2><span class="n">5</span>Prompt 历史快照（≥3 个核心迭代，可直接引用）</h2>
+    <p class="sub">赛道要求「至少 3 个核心功能迭代的完整 Prompt 链」。以下 4 段来自本项目的真实协作过程，可直接作为快照文字，或对照它们去截图/录屏。</p>
+
+    <h3>迭代 ① 统一主色（设计债清理）</h3>
+    <div class="prompt"><span class="lbl">我的 Prompt</span>前端改造请先读 campus-commission/前端交接文档.md，严格按第 1 节的边界执行：只改 pages/ 和 components/ 的模板与样式，不动 utils/store.js 等数据层。</div>
+    <p><b>AI 的处理：</b>先读交接文档定位到 §7.1「两套主色」的设计债；把登录/学生认证/头像裁剪三处的青绿（#48CBA8→#32AD8D）统一成蓝紫（#4C6FFF→#3A5BE0）；绿色插画在 <code>utils/art.js</code>（边界外）→ 新建 <code>components/CampusBackdrop.vue</code> 重绘蓝紫版替换，<code>art.js</code> 原封不动。</p>
+    <p><b>我如何引导修正：</b>发现 <code>mine.vue</code> 里两处语义色（成功态的 mint 绿）被误改 → 要求回退，保留 mint 作为「成功/提示」语义色，不当作品牌色。</p>
+
+    <h3>迭代 ② 导航动效规范落地</h3>
+    <div class="prompt"><span class="lbl">我的 Prompt</span>电脑端导航动效参数：动画函数 ease-out，时长 280ms；侧边栏展开 width 平滑过渡；子菜单展开 max-height 过渡 + opacity 淡入；悬浮下划线 transform: scaleX 0→1；滚动导航 background-color 和 box-shadow 渐变、高度小幅过渡；禁止弹跳/回弹/过度放大，轻量化，适配 PC。手机端导航栏用立体椭圆和背景分离，参数一致。</div>
+    <p><b>AI 的处理：</b>把参数抽成共享层（<code>--dur:280ms</code> + 统一 ease-out），四套皮肤只改视觉不改节奏；侧栏 width、子菜单 max-height+opacity、下划线 scaleX、吸顶栏 bg/shadow/height 全部按参数实现。</p>
+    <p><b>我如何引导修正：</b>手机端粗野主义皮肤的激活图标黑字压黑底看不见 → 要求改成黄底黑字、对比清晰。</p>
+
+    <h3>迭代 ③ 大厅照演示页重做 + 滚动联动</h3>
+    <div class="prompt"><span class="lbl">我的 Prompt</span>将 ui 界面和动态效果全部实装到我的网站中，格式和这个动效规范演示一样，双端都按照这个来。（在追问中选定：整个大厅照演示重做）</div>
+    <p><b>AI 的处理：</b>重写 <code>hall.vue</code>——顶栏「委托大厅 + 分类链接条（scaleX 悬停下划线）+ 信誉 + 头像 + 发布」、Hero、4 张统计卡、桌面扁平行/手机卡片，数据全部走真实 store。</p>
+    <p><b>我如何引导迭代：</b>进一步要求「滚到哪个分类，指示条平滑移到哪个标签；点击标签平滑滚到对应位置」→ AI 增加 <code>.topbar-ind</code> 滑动指示条、<code>onPageScroll</code> 驱动的 <code>updateActiveByScroll()</code>、点击 <code>uni.pageScrollTo</code>，并处理「滚到底自动选最后一类」的边界。</p>
+
+    <h3>迭代 ④ 顽固 Bug：发布页导航消失 / 卡死</h3>
+    <div class="prompt"><span class="lbl">我的 Prompt</span>发现 bug：下方导航栏切换到发布时，导航栏会消失；并且退出发布页面后，下方导航栏卡住不能点击。修复 bug，我要的效果是：点发布时导航不消失；发布页原本置底的「发布订单」按钮改成随内容滚动；离开发布后导航也能正常使用。</div>
+    <p><b>AI 的定位：</b>① 发布页没有挂载底部导航组件 → 切过去就没了；② 导航内部「跳转中」的锁在 <code>navigateTo</code> 后未复位，旧页面残留在栈里 → 退出后锁死。</p>
+    <p><b>修复：</b>发布页补 <code>&lt;TabBar active="publish"&gt;</code>；固定底栏改为内容内 <code>.submit-inline</code>（随滚动）；导航跳转统一 <code>uni.reLaunch</code> 并在 <code>complete</code> 里复位 <code>navigating</code>。验证「大厅↔发布↔我的」来回切换正常、0 报错。</p>
+  </section>
+
+  <!-- 6 -->
+  <section>
+    <h2><span class="n">6</span>技术文档大纲（PDF，≤30 页）</h2>
+    <p class="sub">赛道点名要写三块：意图控制策略、架构设计、可复现性论证。按下面结构写，页数刚好控制在 20–28 页。</p>
+
+    <table>
+      <tr><th>章节</th><th>页数</th><th>要点</th></tr>
+      <tr><td>1. 项目概述</td><td>1–2</td><td>校园委托是什么、解决什么问题、核心闭环（发单→接单→押金→验收→评价→仲裁）</td></tr>
+      <tr><td>2. 架构设计</td><td>6–8</td><td>
+        <b>前端</b>：uni-app + Vue3，组件化（TaskCard / SideNav / TabBar / AppHeader），状态层 <code>store.js</code>，同步层 <code>sync.js</code>；<br>
+        <b>构建</b>：Vite 构建 H5，<code>build-single</code> 内联成单文件；<br>
+        <b>后端</b>：Node 原生 <code>http</code> + <code>data.json</code>，systemd 托管；<br>
+        <b>AI 代码如何被约束</b>：目录边界（只改 pages/components）、数据层不动、统一设计令牌
+      </td></tr>
+      <tr><td>3. 意图控制策略</td><td>7–9</td><td>
+        如何写 Prompt：先给「参数化规范」（时长/缓动/禁止项），再给「边界」（只改哪层）；<br>
+        如何分步迭代：小步改、每步验收；<br>
+        如何让 AI 自我约束：要求它先读交接文档、先定位再改；<br>
+        失败与回退：误改语义色 → 明确回退规则
+      </td></tr>
+      <tr><td>4. 可复现性论证</td><td>3–4</td><td>环境（Node 22+）、依赖清单、一条命令跑起来、单文件离线可开、后端可 Docker/systemd 部署、演示数据内置</td></tr>
+      <tr><td>5. AI 协作 Prompt 链</td><td>3–4</td><td>直接引用 §5 的 4 段迭代，配截图</td></tr>
+      <tr><td>6. 局限与展望</td><td>1–2</td><td>当前为单机 JSON 存储、无鉴权；未来改 SQLite + 服务端鉴权 + 按需查询</td></tr>
+    </table>
+    <div class="callout warn">
+      <b>提醒：</b>赛道明确「重点阐述意图控制策略」——不要写成产品说明书，要多写「我为什么这样提需求、AI 跑偏时我怎么拉回来」。这一段最拉分。
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section>
+    <h2><span class="n">7</span>10 分钟极速复现指南（可直接放进 README.md）</h2>
+    <p class="sub">把下面内容粘到仓库 <code>README.md</code> 的「快速开始」里即可满足赛道要求。</p>
+
+    <h3>环境要求</h3>
+    <ul>
+      <li>Node.js ≥ 22（推荐 22.x LTS），npm ≥ 10</li>
+      <li>无需数据库、无需额外环境变量（前端默认走本地存储；后端可选）</li>
+    </ul>
+
+    <h3>三步跑起来</h3>
+    <div class="prompt"><span class="lbl">终端</span># 1. 安装依赖
+npm install
+
+# 2. 本地开发（H5）
+npm run dev:h5
+# 打开终端提示的本地地址（通常 http://localhost:5173）
+
+# 3. 或直接产出「单文件版」，双击即开、离线可用
+npm run build:single
+# 生成：校园委托-单文件版.html</div>
+
+    <h3>登录演示</h3>
+    <p>打开后是登录页，点页面下方的演示账号 <b>林小满 / 许一帆 / 张老师</b> 即可直接进入（无需注册）。</p>
+
+    <h3>可选：多人共享后端</h3>
+    <div class="prompt"><span class="lbl">终端</span>cd server
+node server.js        # 默认 http://localhost:3000，数据存 data.json
+# 部署到云服务器：sh deploy.sh（Ubuntu，systemd 托管，自带每日备份）</div>
+
+    <h3>环境变量模板</h3>
+    <p>前端无需环境变量；后端可选 <code>PORT</code>（默认 3000）。如需，提供 <code>.env.example</code>：</p>
+    <div class="prompt"><span class="lbl">.env.example</span># 后端端口（可选，默认 3000）
+PORT=3000</div>
+
+    <div class="callout info">
+      <b>复现自检：</b>① 首页能打开不白屏；② 点演示账号能进大厅；③ 大厅有委托列表与分类；④ 发布一条委托成功；⑤ 手机打开同一地址布局正常。
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section>
+    <h2><span class="n">8</span>提交前检查清单</h2>
+    <ul class="check">
+      <li>仓库已设为 <b>Public</b>（或已给评审开访问权限）</li>
+      <li>提交历史是<b>细粒度</b>的，没有「一次提交全部功能」；每个 commit 能对应一次 AI 对话/一个模块</li>
+      <li>至少有 <b>3 个核心迭代</b>的 Prompt 链（截图/录屏/文字快照），含「提问 → AI 建议 → 引导修 Bug」</li>
+      <li>README 有「10 分钟复现」：环境、依赖、命令、演示账号</li>
+      <li>演示视频 5–8 分钟、1080p、MP4，含 <b>≥2 分钟</b> AI 协同段</li>
+      <li>技术文档 PDF ≤30 页，覆盖意图控制 / 架构 / 可复现</li>
+      <li>视频与文档里的项目名、截图、链接一致，不出现「未完成」字样</li>
+      <li>提交前自己完整走一遍视频里的演示流程，确保不卡壳</li>
+    </ul>
+  </section>
+
+  <p class="foot">校园委托 · 传智杯参赛材料与演示流程 · 本文档可直接打印为 PDF</p>
+</div>
+</body>
+</html>

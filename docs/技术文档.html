@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>校园委托 · 技术文档</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 16mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1f2937; font-size: 13.2px; line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  .doc { max-width: 780px; margin: 0 auto; padding: 24px 0 40px; }
+  /* 封面 */
+  .cover { min-height: 88vh; display: flex; flex-direction: column; justify-content: center; padding: 0 8px; page-break-after: always; }
+  .cover .kicker { font-size: 12px; letter-spacing: .2em; color: #2563eb; font-weight: 700; margin: 0 0 14px; }
+  .cover h1 { font-size: 40px; line-height: 1.15; margin: 0 0 10px; letter-spacing: -.02em; }
+  .cover .sub { font-size: 17px; color: #4b5563; margin: 0 0 28px; }
+  .cover .rule { width: 64px; height: 4px; background: #2563eb; border-radius: 2px; margin: 0 0 28px; }
+  .cover .meta { display: grid; grid-template-columns: 96px 1fr; gap: 6px 16px; font-size: 13px; color: #374151; }
+  .cover .meta b { color: #111827; }
+  .cover .foot { margin-top: 40px; font-size: 12px; color: #9ca3af; }
+  /* 标题 */
+  h2 { font-size: 21px; margin: 34px 0 10px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; letter-spacing: -.01em; page-break-after: avoid; }
+  h2 .n { color: #2563eb; margin-right: 8px; }
+  h3 { font-size: 15.5px; margin: 20px 0 6px; color: #111827; page-break-after: avoid; }
+  h4 { font-size: 13.5px; margin: 14px 0 4px; color: #1f2937; }
+  p { margin: 7px 0; }
+  ul, ol { margin: 7px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12.4px; page-break-inside: avoid; }
+  th, td { border: 1px solid #e5e7eb; padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; font-weight: 700; color: #374151; }
+  code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; background: #f3f4f6; padding: 1px 5px; border-radius: 4px; color: #111827; }
+  pre { background: #0f172a; color: #e2e8f0; border-radius: 8px; padding: 12px 14px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.6px; line-height: 1.65; overflow: hidden; white-space: pre-wrap; page-break-inside: avoid; }
+  .note { background: #eff6ff; border-left: 4px solid #2563eb; padding: 10px 14px; margin: 12px 0; font-size: 12.6px; color: #1e40af; border-radius: 0 8px 8px 0; page-break-inside: avoid; }
+  .warn { background: #fffbeb; border-left: 4px solid #d97706; padding: 10px 14px; margin: 12px 0; font-size: 12.6px; color: #92400e; border-radius: 0 8px 8px 0; page-break-inside: avoid; }
+  .toc { page-break-after: always; }
+  .toc ol { list-style: none; padding-left: 0; counter-reset: toc; }
+  .toc li { counter-increment: toc; padding: 6px 0; border-bottom: 1px dashed #e5e7eb; font-size: 13.5px; }
+  .toc li::before { content: counter(toc) ". "; color: #2563eb; font-weight: 700; }
+  .toc li span { color: #6b7280; font-size: 12px; float: right; }
+  .pb { page-break-before: always; }
+  .small { font-size: 12px; color: #6b7280; }
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <!-- 封面 -->
+  <div class="cover">
+    <p class="kicker">传智杯 · 技术文档</p>
+    <h1>校园委托</h1>
+    <p class="sub">面向校园的轻量任务委托平台 · 人机协作开发实践</p>
+    <div class="rule"></div>
+    <div class="meta">
+      <b>项目名称</b><span>校园委托（Campus Commission）</span>
+      <b>技术栈</b><span>uni-app + Vue 3 + Vite；Node 原生 http + JSON</span>
+      <b>交付形态</b><span>H5 单文件 / 在线链接 / 可选多人共享后端</span>
+      <b>文档重点</b><span>意图控制策略 · 架构设计 · 可复现性论证</span>
+      <b>文档版本</b><span>v1.0</span>
+    </div>
+    <p class="foot">本文档由人机协作完成，代码与过程材料见配套公开仓库。</p>
+  </div>
+
+  <!-- 目录 -->
+  <div class="toc">
+    <h2><span class="n">0</span>目录</h2>
+    <ol>
+      <li>项目概述 <span>§1</span></li>
+      <li>架构设计 <span>§2</span></li>
+      <li>意图控制策略（重点） <span>§3</span></li>
+      <li>可复现性论证 <span>§4</span></li>
+      <li>AI 协作 Prompt 链 <span>§5</span></li>
+      <li>局限与展望 <span>§6</span></li>
+    </ol>
+    <p class="small" style="margin-top:24px">说明：本文档聚焦「人如何用 AI 把项目做出来、并保证可复现」，而非产品说明书。产品功能细节见仓库 README。</p>
+  </div>
+
+  <!-- 1 -->
+  <h2><span class="n">1</span>项目概述</h2>
+  <h3>1.1 背景与定位</h3>
+  <p>校园里存在大量小额、即时、非标准的互助需求：代取快递、代买饭、文档排版、临时拍照、占座等。它们金额小、频次高、信任半径短，用通用跑腿平台既不划算也不安全。「校园委托」面向同一所学校的学生，提供一个<strong>小额、有押金、有信用沉淀</strong>的委托闭环。</p>
+  <h3>1.2 核心闭环</h3>
+  <p>发布委托 → 自由接单 → 缴纳押金 → 交付 → 验收 → 评价 / 信用沉淀 → 纠纷仲裁。平台只做小额订单（报酬上限 200 元），押金不低于订单报酬、上限 200 元，验收后返还。</p>
+  <h3>1.3 功能范围</h3>
+  <table>
+    <tr><th>模块</th><th>主要内容</th></tr>
+    <tr><td>账号</td><td>手机号/密码登录、学生认证、头像裁剪、信誉分</td></tr>
+    <tr><td>委托大厅</td><td>分类分区、滚动联动导航、搜索、发布入口</td></tr>
+    <tr><td>发布</td><td>类型/标题/地点/报酬/截止/附件、违规词拦截、押金规则</td></tr>
+    <tr><td>订单</td><td>状态机（待接单→已接单→进行中→待验收→已完成/已取消）</td></tr>
+    <tr><td>消息 / 钱包</td><td>私聊（限 10 句引导站内交易）、押金与收入</td></tr>
+    <tr><td>个人中心</td><td>资料、技能标签、作品集、历史头像、立体卡片交互</td></tr>
+    <tr><td>管理后台</td><td>审核委托、纠纷仲裁、分类与公告管理</td></tr>
+  </table>
+
+  <!-- 2 -->
+  <h2 class="pb"><span class="n">2</span>架构设计</h2>
+  <h3>2.1 技术栈与选型理由</h3>
+  <table>
+    <tr><th>层</th><th>选型</th><th>理由</th></tr>
+    <tr><td>视图</td><td>uni-app + Vue 3</td><td>一套代码同时产出 H5 与小程序，适合校园场景；Vue 3 组合式/选项式皆可</td></tr>
+    <tr><td>构建</td><td>Vite 5</td><td>启动快、构建快；通过自定义脚本把产物内联成单文件</td></tr>
+    <tr><td>状态</td><td>自研 <code>store.js</code></td><td>轻量、无第三方依赖；用响应式 <code>dataTick</code> 驱动视图刷新</td></tr>
+    <tr><td>同步</td><td><code>sync.js</code></td><td>本地优先 + 增量推送 + 定时拉取版本号，弱网可用</td></tr>
+    <tr><td>后端</td><td>Node 原生 <code>http</code> + <code>data.json</code></td><td>零依赖、单文件部署；几十人规模足够，运维成本极低</td></tr>
+  </table>
+  <h3>2.2 目录结构（节选）</h3>
+  <pre>campus-commission/
+├─ src/
+│  ├─ pages/            # 页面：login / hall / detail / publish / orders / chat / mine ...
+│  ├─ components/       # 通用组件：TaskCard / SideNav / TabBar / AppHeader / Avatar ...
+│  ├─ utils/            # 数据层：store.js / sync.js / seed.js / constants.js / api.js
+│  ├─ App.vue           # 全局设计令牌与布局
+│  └─ pages.json        # 路由与页面配置
+├─ scripts/             # build-single.js（单文件构建）/ 自动化 flow 测试
+├─ server/              # 可选后端：server.js + deploy.sh + data.json
+└─ docs/                # 本文档、AI 协作记录、演示脚本</pre>
+  <h3>2.3 分层架构</h3>
+  <p>整体是「<strong>视图层 → 组件层 → 状态层 → 同步层 → 后端</strong>」的单向数据流：</p>
+  <ul>
+    <li><strong>视图层</strong>（pages）：只负责布局与交互，通过 store 暴露的函数读写数据，不直接碰存储。</li>
+    <li><strong>组件层</strong>（components）：可复用的展示与交互单元（委托卡、侧栏、底部导航、页头）。</li>
+    <li><strong>状态层</strong>（store.js）：内存状态 + 本地缓存，所有业务规则（押金、状态机、信誉）集中在这里，页面不重复实现。</li>
+    <li><strong>同步层</strong>（sync.js）：本地优先，操作后 300ms 增量推送；每 4 秒比对服务端版本号，变化则拉全量。</li>
+    <li><strong>后端</strong>（server.js）：单进程同时提供接口与网页，数据存 <code>data.json</code>，写入采用「先写临时文件再改名」防损坏。</li>
+  </ul>
+  <h3>2.4 两个关键设计</h3>
+  <h4>（1）单文件构建</h4>
+  <p><code>scripts/build-single.js</code> 以 <code>UNI_SINGLE_FILE=1</code> 关闭代码分割，再由 <code>inline.js</code> 把 JS/CSS 全部内联进一个 HTML。产物可双击打开、离线运行、静态托管，答辩演示零依赖。</p>
+  <h4>（2）本地优先同步</h4>
+  <p>打开页面先显示本地缓存（秒开），同时拉一次服务端数据覆盖；操作本地立刻生效，300ms 后把「变了哪几条」推给服务端；每 4 秒问一次版本号。推的是增量而非全量，流量小、弱网可用。</p>
+  <h3>2.5 AI 生成代码的架构约束</h3>
+  <p>AI 容易「越界」——把数据逻辑写进页面、把样式写死在各处。为约束它，项目确立三条硬边界，并在每次 Prompt 中重申：</p>
+  <ul>
+    <li><strong>目录边界</strong>：前端改造只允许改 <code>pages/</code> 与 <code>components/</code>，<code>utils/</code> 数据层不动。</li>
+    <li><strong>设计令牌</strong>：颜色、圆角、阴影统一走 <code>App.vue</code> 里的 CSS 变量，禁止页面里散落魔法值。</li>
+    <li><strong>单一事实来源</strong>：业务规则只在 <code>store.js</code> 实现，页面只调用，不复制逻辑。</li>
+  </ul>
+  <div class="note">这三条边界让 AI 的产出「可预期」：即使它一次改很多文件，改动也局限在展示层，不会破坏数据与规则。</div>
+
+  <!-- 3 -->
+  <h2 class="pb"><span class="n">3</span>意图控制策略（重点）</h2>
+  <p>这一章回答赛道最关心的问题：<strong>我是如何设计上下文与 Prompt，让 AI 稳定产出我想要的结果的。</strong></p>
+
+  <h3>3.1 先给上下文，再给任务</h3>
+  <p>每次大改前，先让 AI 读「交接文档」，把项目边界、设计系统、已知设计债讲清楚，再提需求。例如：</p>
+  <pre>前端改造请先读 campus-commission/前端交接文档.md，
+严格按第 1 节的边界执行：只改 pages/ 和 components/ 的模板与样式，
+不动 utils/store.js 等数据层。</pre>
+  <p>好处：AI 不会「热情过头」地去重构数据层，改动面可控，评审也能顺着文档复现。</p>
+
+  <h3>3.2 Prompt 的四个要素</h3>
+  <p>我把有效的 Prompt 拆成四块，缺一块就容易返工：</p>
+  <table>
+    <tr><th>要素</th><th>作用</th><th>示例</th></tr>
+    <tr><td>目标</td><td>一句话说清要什么</td><td>「把大厅改成分类分区 + 滚动联动」</td></tr>
+    <tr><td>参数</td><td>把模糊的「好看」变成可执行数值</td><td>「ease-out，280ms；禁止弹跳/回弹/过度放大」</td></tr>
+    <tr><td>边界</td><td>限定改动范围，防止误伤</td><td>「只改 pages/components，不动数据层」</td></tr>
+    <tr><td>验收</td><td>给出可自检的标准</td><td>「滚到哪个分类指示条就滑到哪个标签；点标签平滑滚过去」</td></tr>
+  </table>
+
+  <h3>3.3 分步迭代，小步验收</h3>
+  <p>不追求一次成型。每次只推进一个可验证的小目标：先统一配色 → 再抽导航动效参数 → 再做大厅版式 → 最后做滚动联动。每步做完立刻用无头浏览器截图/断言验收，通过了再进入下一步。这样即使某步跑偏，回退成本也很低。</p>
+
+  <h3>3.4 失败模式与纠偏</h3>
+  <table>
+    <tr><th>失败模式</th><th>现象</th><th>我的纠偏</th></tr>
+    <tr><td>越界重构</td><td>AI 顺手改了数据层</td><td>Prompt 里重申目录边界，要求只提交展示层改动</td></tr>
+    <tr><td>语义色被误伤</td><td>「成功态」的薄荷绿被当成品牌绿一起改掉</td><td>明确「mint 是语义色，不是品牌色」，要求回退</td></tr>
+    <tr><td>动效过度</td><td>按下反馈缩放 0.96、变暗 0.9，太重</td><td>改成「轻微下压」：0.985 + 下沉 1px + 亮度 0.96</td></tr>
+    <tr><td>交互错位</td><td>切到发布页导航消失、退出后卡死</td><td>先让 AI 定位根因（缺组件 + 锁未复位），再按根因修</td></tr>
+  </table>
+  <div class="warn"><strong>关键心得：</strong>AI 跑偏时，不要只说「不对，重做」，而要指出「哪里不对、为什么、期望是什么」。把 Bug 描述清楚（复现步骤 + 期望效果），AI 的定位准确率会高很多。</div>
+
+  <h3>3.5 让 AI 自我约束的三个技巧</h3>
+  <ol>
+    <li><strong>先读后写</strong>：要求它先读交接文档/相关文件，再动手，避免凭空发挥。</li>
+    <li><strong>先定位再修</strong>：修 Bug 时要求它先给出根因分析，再改代码，避免「试错式乱改」。</li>
+    <li><strong>给验收脚本</strong>：让它顺手写/跑一个断言（例如「点击后胶囊 translateX 应等于标签偏移」），用机器验证代替肉眼判断。</li>
+  </ol>
+
+  <!-- 4 -->
+  <h2 class="pb"><span class="n">4</span>可复现性论证</h2>
+  <h3>4.1 环境与依赖</h3>
+  <table>
+    <tr><th>项目</th><th>要求</th></tr>
+    <tr><td>Node.js</td><td>≥ 22（推荐 22.x LTS）</td></tr>
+    <tr><td>npm</td><td>≥ 10</td></tr>
+    <tr><td>数据库</td><td>不需要（前端本地存储；后端为单文件 JSON）</td></tr>
+    <tr><td>环境变量</td><td>前端无需；后端仅可选 <code>PORT</code></td></tr>
+  </table>
+  <p>核心依赖：<code>vue ^3.4.21</code>、<code>@dcloudio/uni-app</code>、<code>@dcloudio/vite-plugin-uni</code>、<code>vite ^5.2.8</code>。全部通过 <code>npm install</code> 安装，无全局依赖。</p>
+
+  <h3>4.2 一条命令跑起来</h3>
+  <pre>npm install
+npm run dev:h5        # 本地开发，浏览器打开终端提示的地址
+# 或
+npm run build:single  # 生成「校园委托-单文件版.html」，双击即开</pre>
+
+  <h3>4.3 构建产物</h3>
+  <p>单文件版把 HTML/CSS/JS 全部内联，<strong>零依赖、离线可运行</strong>，可直接静态托管（Netlify / Cloudflare Pages / 对象存储）或本地双击打开。</p>
+
+  <h3>4.4 后端（可选）</h3>
+  <pre>cd server
+node server.js        # http://localhost:3000，数据存 data.json
+sh deploy.sh          # Ubuntu 一键部署（systemd 托管 + 每日备份）</pre>
+
+  <h3>4.5 演示数据</h3>
+  <p>首次启动自动写入演示数据（11 条委托、7 个账号），登录页可直接点「林小满 / 许一帆 / 张老师」进入，无需注册，保证评审打开即用。</p>
+  <div class="note"><strong>复现自检：</strong>首页不白屏 → 演示账号能进大厅 → 有委托列表与分类 → 能发布一条委托 → 手机端布局正常。</div>
+
+  <!-- 5 -->
+  <h2 class="pb"><span class="n">5</span>AI 协作 Prompt 链（核心迭代）</h2>
+  <p>以下四段来自真实开发过程，完整对话记录（截图/录屏）随仓库 <code>docs/AI-协作记录.md</code> 提供。</p>
+
+  <h3>迭代 ① 统一主色（清理设计债）</h3>
+  <pre>【Prompt】前端改造请先读前端交接文档，严格按第 1 节边界：
+只改 pages/ 和 components/ 的模板与样式，不动 utils/store.js。</pre>
+  <p><strong>AI 处理：</strong>定位到交接文档 §7.1「两套主色」；把登录/认证/裁剪的青绿统一为蓝紫；绿色插画在 <code>utils/art.js</code>（边界外），改为新建 <code>CampusBackdrop.vue</code> 重绘替换，原文件不动。</p>
+  <p><strong>我如何纠偏：</strong>发现 <code>mine.vue</code> 把「成功态」的 mint 绿误改 → 要求回退，明确 mint 是语义色。</p>
+
+  <h3>迭代 ② 导航动效规范落地</h3>
+  <pre>【Prompt】导航动效：ease-out / 280ms；侧栏 width 平滑过渡；
+子菜单 max-height + opacity；下划线 scaleX 0→1；滚动导航 bg+shadow+height；
+禁止弹跳/回弹/过度放大，轻量化，适配 PC；手机端立体椭圆同参数。</pre>
+  <p><strong>AI 处理：</strong>把参数抽成共享层，四套皮肤只改视觉不改节奏，逐项实现。</p>
+  <p><strong>我如何纠偏：</strong>粗野主义皮肤激活图标黑压黑不可见 → 改黄底黑字提高对比。</p>
+
+  <h3>迭代 ③ 大厅重做 + 滚动联动</h3>
+  <pre>【Prompt】将 UI 与动效全部实装到我的网站，格式和这个动效规范演示一样，
+双端都按这个来。（追问中选定：整个大厅照演示重做）</pre>
+  <p><strong>AI 处理：</strong>重写 <code>hall.vue</code>：顶栏分类链接条（scaleX 下划线）+ Hero + 统计卡 + 双端列表，数据走真实 store。</p>
+  <p><strong>我如何引导迭代：</strong>追加「滚到哪个分类指示条滑到哪个标签；点标签平滑滚过去」→ AI 增加滑动指示条、<code>onPageScroll</code> 驱动的滚动联动、<code>uni.pageScrollTo</code> 点击滚动，并处理「滚到底自动选最后一类」的边界。</p>
+
+  <h3>迭代 ④ 顽固 Bug：发布页导航消失 / 卡死</h3>
+  <pre>【Prompt】Bug：切到发布时导航消失；退出发布后导航卡住点不动。
+期望：点发布时导航不消失；发布页「发布订单」按钮改为随内容滚动；
+离开发布后导航也能正常用。</pre>
+  <p><strong>AI 定位：</strong>① 发布页未挂载底部导航 → 消失；② 导航内部「跳转中」锁在 <code>navigateTo</code> 后未复位，旧页残留 → 锁死。</p>
+  <p><strong>修复：</strong>发布页补 <code>&lt;TabBar&gt;</code>；固定底栏改为内容内 <code>.submit-inline</code>；跳转统一 <code>reLaunch</code> 并在 <code>complete</code> 复位锁。验证「大厅↔发布↔我的」来回切换正常。</p>
+
+  <!-- 6 -->
+  <h2 class="pb"><span class="n">6</span>局限与展望</h2>
+  <h3>6.1 当前局限</h3>
+  <ul>
+    <li><strong>存储</strong>：后端为单文件 JSON + 内存，适合几十人演示规模，不适合高并发。</li>
+    <li><strong>鉴权</strong>：接口无服务端鉴权，拿到地址即可调用（校园演示定位，不放真实隐私）。</li>
+    <li><strong>同步</strong>：整份状态下发 + 增量推送，数据量变大后会变慢；并发改同一条为「后写覆盖」。</li>
+  </ul>
+  <h3>6.2 演进方向</h3>
+  <ul>
+    <li>存储改为 SQLite，接口改为「按需查询」而非全量下发；</li>
+    <li>引入服务端鉴权与会话，敏感操作二次校验；</li>
+    <li>把押金、评价做成可审计的流水，便于纠纷追溯。</li>
+  </ul>
+  <h3>6.3 协作方法论沉淀</h3>
+  <p>本项目验证了一套可复用的「人机协作」范式：<strong>人定方向与边界，AI 负责落地，机器断言负责验收</strong>。它不依赖某个特定 AI 工具，换一个模型，只要坚持「上下文 + 参数 + 边界 + 验收」四要素，产出依然稳定、可复现。</p>
+
+  <p class="small" style="margin-top:28px">— 文档结束 · 配套仓库包含源码、细粒度提交历史、AI 协作记录与复现指南 —</p>
+
+</div>
+</body>
+</html>
