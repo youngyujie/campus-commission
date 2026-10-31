@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>校园委托 · 导航动效规范演示</title>
+<style>
+  /* =================================================================
+     全局基底（不属于任何风格，只负责外壳 + 说明 + 切换）
+     ================================================================= */
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #e9ebf0; color: #14161f;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 顶部控制条 */
+  .bar {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    padding: 12px 22px;
+    background: rgba(255,255,255,.86); backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(20,22,31,.08);
+  }
+  .bar .brand { font-size: 14px; font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
+  .bar .brand span { color: #8b90a3; font-weight: 500; margin-left: 8px; }
+  .seg { display: inline-flex; background: #eceef3; border-radius: 999px; padding: 3px; gap: 2px; }
+  .seg button {
+    appearance: none; border: 0; background: none; font-family: inherit;
+    font-size: 13px; font-weight: 600; color: #6b7080; padding: 7px 15px;
+    border-radius: 999px; cursor: pointer; transition: background-color .18s ease, color .18s ease;
+  }
+  .seg button[aria-pressed="true"] { background: #fff; color: #14161f; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .bar .hint { margin-left: auto; font-size: 12px; color: #8b90a3; white-space: nowrap; }
+  .bar .grp { display: inline-flex; align-items: center; gap: 8px; }
+  .bar .grp > label { font-size: 12px; color: #6b7080; font-weight: 600; }
+
+  .params {
+    max-width: 1180px; margin: 18px auto 0; padding: 0 22px;
+  }
+  .params table {
+    width: 100%; border-collapse: collapse; font-size: 12.5px; background: #fff;
+    border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  .params th, .params td { text-align: left; padding: 9px 14px; border-bottom: 1px solid #eef0f4; }
+  .params th { background: #f6f7f9; color: #4a4f63; font-weight: 600; width: 160px; }
+  .params td code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; background: #f2f3f6; padding: 1px 6px; border-radius: 4px; }
+  .params .tag { display:inline-block; font-size:11px; color:#1f8a4c; background:#e7f6ec; padding:2px 8px; border-radius:999px; }
+
+  .stage { max-width: 1180px; margin: 18px auto 60px; padding: 0 22px; }
+  .stage[hidden] { display: none; }
+
+  /* =================================================================
+     导航动效核心（四套皮肤共用 —— 只改视觉，不改节奏）
+     · 动画函数 ease-out / 时长 280ms
+     · 无弹跳 / 无回弹 / 无过度放大
+     ================================================================= */
+  :root {
+    --dur: 280ms;
+    --ease-out: cubic-bezier(0, 0, 0.58, 1);   /* 标准 ease-out，全程不越过终点 */
+    --rail-w: 240px;
+    --rail-w-min: 76px;
+    --bar-h: 64px;
+    --bar-h-min: 54px;
+  }
+  /* 统一关闭弹性/放大：仅 ease-out + 固定时长 */
+  .nav-anim, .nav-anim * {
+    transition-timing-function: var(--ease-out) !important;
+  }
+
+  /* ---------------- 桌面端布局 ---------------- */
+  .pc { display: flex; height: 720px; overflow: hidden; border-radius: 16px;
+        box-shadow: 0 24px 60px -30px rgba(20,22,31,.5), 0 2px 8px rgba(20,22,31,.06); }
+
+  /* 侧边栏：width 平滑过渡 */
+  .pc-rail {
+    width: var(--rail-w); flex: none; display: flex; flex-direction: column; overflow: hidden;
+    background: var(--rail-bg); border-right: 1px solid var(--rail-bd);
+    transition: width var(--dur) var(--ease-out), background-color var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out);
+  }
+  .pc.app-collapsed .pc-rail { width: var(--rail-w-min); }
+
+  .pc-rail-head { display: flex; align-items: center; gap: 10px; padding: 18px 16px 16px; }
+  .pc-logo { width: 30px; height: 30px; border-radius: 9px; background: var(--accent); color: #fff;
+             display: grid; place-items: center; font-size: 14px; font-weight: 700; flex: none; }
+  .pc-brand { font-size: 14.5px; font-weight: 600; white-space: nowrap; color: var(--ink); }
+  .pc-collapse {
+    margin-left: auto; flex: none; width: 28px; height: 28px; border: 0; cursor: pointer;
+    border-radius: 8px; background: transparent; color: var(--muted); font-size: 15px; line-height: 1;
+    display: grid; place-items: center; font-family: inherit;
+    transition: background-color var(--dur) var(--ease-out), color var(--dur) var(--ease-out);
+  }
+  .pc-collapse:hover { background: var(--hover); color: var(--ink); }
+  .pc-collapse i { display: block; transition: transform var(--dur) var(--ease-out); font-style: normal; }
+  .pc.app-collapsed .pc-collapse i { transform: rotate(180deg); }
+  .pc.app-collapsed .pc-brand { display: none; }
+  .pc.app-collapsed .pc-collapse { margin-left: 0; }
+  .pc.app-collapsed .pc-rail-head { justify-content: center; }
+
+  .pc-nav { position: relative; padding: 6px 12px; flex: 1; }
+  /* 一级项 */
+  .pc-item {
+    position: relative; z-index: 1; display: flex; align-items: center; gap: 11px; width: 100%;
+    border: 0; background: none; cursor: pointer; text-align: left; font-family: inherit;
+    padding: 10px 12px; border-radius: 11px; font-size: 13.5px; color: var(--muted);
+    transition: background-color var(--dur) var(--ease-out), color var(--dur) var(--ease-out);
+  }
+  .pc-item:hover { background: var(--hover); color: var(--ink); }
+  .pc-item.is-on { color: var(--ink); font-weight: 600; }
+  .pc-item .ico { flex: none; width: 20px; text-align: center; font-size: 14px; }
+  .pc-item .label { white-space: nowrap; }
+  /* 收起态：文字让位，图标居中 */
+  .pc.app-collapsed .pc-item { justify-content: center; padding-left: 0; padding-right: 0; }
+  .pc.app-collapsed .pc-item .label { opacity: 0; width: 0; overflow: hidden; }
+
+  /* 侧栏激活指示：滑动 pill（与手机端同参数，不单独用椭圆包裹） */
+  .pc-ind {
+    position: absolute; top: 0; left: 12px; right: 12px; border-radius: 11px;
+    background: var(--on-bg);
+    transition: transform var(--dur) var(--ease-out), height var(--dur) var(--ease-out);
+    pointer-events: none; z-index: 0;
+  }
+
+  .pc-rail-foot { padding: 12px 16px; border-top: 1px solid var(--rail-bd); font-size: 11.5px; color: var(--subtle); white-space: nowrap; }
+  .pc.app-collapsed .pc-rail-foot { display: none; }
+
+  .pc-main { flex: 1; min-width: 0; overflow-y: auto; position: relative; background: var(--paper); }
+  /* 吸顶导航：背景色 + 阴影 + 高度小幅过渡 */
+  .pc-topbar {
+    position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 26px;
+    height: var(--bar-h); padding: 0 30px;
+    background: var(--topbar-bg); border-bottom: 1px solid transparent;
+    transition: height var(--dur) var(--ease-out), background-color var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out);
+  }
+  .pc-topbar.is-scrolled {
+    height: var(--bar-h-min);
+    background: var(--topbar-bg-scr);
+    box-shadow: var(--topbar-shadow);
+    border-bottom-color: var(--rail-bd);
+  }
+  .pc-title { font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+  .pc-links { display: flex; gap: 22px; }
+  .pc-links a {
+    position: relative; text-decoration: none; white-space: nowrap; cursor: pointer;
+    font-size: 13px; color: var(--muted);
+    transition: color var(--dur) var(--ease-out);
+  }
+  .pc-links a:hover, .pc-links a.is-on { color: var(--ink); }
+  /* 悬浮下划线：scaleX 0 → 1 */
+  .pc-links a::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 2px;
+    background: var(--accent); transform: scaleX(0); transform-origin: left center;
+    transition: transform var(--dur) var(--ease-out);
+  }
+  .pc-links a:hover::after, .pc-links a.is-on::after { transform: scaleX(1); }
+  .pc-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .pc-pill-btn { font-size: 12.5px; padding: 8px 15px; border-radius: 999px; background: var(--accent); color: #fff; border: 0; cursor: pointer; font-family: inherit; }
+  .pc-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--hover); display: grid; place-items: center; font-size: 13px; color: var(--ink); }
+
+  /* 内容（足够长以便滚动） */
+  .pc-hero { padding: 30px 30px 26px; }
+  .pc-hero h1 { margin: 0; font-size: 30px; line-height: 1.25; font-weight: 650; letter-spacing: -.02em; color: var(--ink); }
+  .pc-hero p { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
+  .pc-search { margin-top: 20px; display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--rail-bd); border-radius: 13px; padding: 14px 18px; font-size: 14px; color: var(--subtle); }
+  .pc-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; padding: 0 30px 26px; }
+  .pc-stat { background: var(--card); border: 1px solid var(--rail-bd); border-radius: 14px; padding: 16px 18px; }
+  .pc-stat b { display: block; font-size: 24px; color: var(--ink); }
+  .pc-stat span { font-size: 12px; color: var(--muted); }
+  .pc-list { padding: 0 30px 40px; }
+  .pc-list h2 { font-size: 16px; color: var(--ink); margin: 0 0 12px; }
+  /* 委托订单：列表行（取消卡片立体），仅 hover 轻微上浮 */
+  .pc-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 2px; border-top: 1px solid var(--rail-bd);
+    transition: transform var(--dur) var(--ease-out), background-color var(--dur) var(--ease-out);
+  }
+  .pc-row:first-of-type { border-top: 0; }
+  .pc-row:hover {                                   /* 电脑端：轻微上浮（无放大） */
+    transform: translateY(-3px);
+    background-color: var(--hover);
+  }
+  .pc-row i { width: 34px; height: 34px; border-radius: 10px; background: rgba(0,0,0,.03); display: grid; place-items: center; font-style: normal; font-size: 15px; flex: none; }
+  .pc-row .m { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .pc-row .m b { font-size: 13.5px; color: var(--ink); line-height: 1.3; }
+  .pc-row .m .meta { font-size: 12px; color: var(--muted); }
+  .pc-row .price { margin-left: auto; font-size: 15px; font-weight: 650; color: var(--ink); flex: none; }
+  .pc-fill { height: 520px; } /* 占位，保证可滚动 */
+
+  /* ---------------- 手机端布局 ---------------- */
+  .phone-wrap { display: flex; justify-content: center; padding: 8px 0 10px; }
+  .phone {
+    width: 402px; height: 760px; background: #0e0f13; border-radius: 46px; padding: 12px;
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,.55); position: relative;
+  }
+  .phone::before { /* 听筒 */
+    content: ""; position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 22px; background: #000; border-radius: 999px; z-index: 20;
+  }
+  .phone-screen {
+    position: relative; width: 100%; height: 100%; border-radius: 34px; overflow: hidden;
+    background: var(--paper); display: flex; flex-direction: column;
+  }
+  .mob-scroll { flex: 1; overflow-y: auto; position: relative; -webkit-overflow-scrolling: touch; }
+  /* 手机吸顶导航：同样的高度/背景/阴影过渡 */
+  .mob-topbar {
+    position: sticky; top: 0; z-index: 6; display: flex; align-items: center; gap: 14px;
+    height: 56px; padding: 0 20px;
+    background: var(--topbar-bg);
+    transition: height var(--dur) var(--ease-out), background-color var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out);
+  }
+  .mob-topbar.is-scrolled { height: 48px; background: var(--topbar-bg-scr); box-shadow: var(--topbar-shadow); }
+  .mob-topbar .mt-title { font-size: 15px; font-weight: 600; color: var(--ink); }
+  .mob-topbar .mt-avatar { margin-left: auto; width: 30px; height: 30px; border-radius: 50%; background: var(--hover); display: grid; place-items: center; font-size: 12px; color: var(--ink); }
+
+  .mob-hero { padding: 26px 22px 20px; }
+  .mob-hero h1 { margin: 0; font-size: 24px; line-height: 1.35; font-weight: 650; color: var(--ink); }
+  .mob-hero p { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+  .mob-search { margin-top: 16px; display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--rail-bd); border-radius: 12px; padding: 13px 15px; font-size: 13px; color: var(--subtle); }
+  .mob-stats { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; padding: 0 22px 18px; }
+  .mob-stat { background: var(--card); border: 1px solid var(--rail-bd); border-radius: 14px; padding: 14px 16px; }
+  .mob-stat b { display: block; font-size: 20px; color: var(--ink); }
+  .mob-stat span { font-size: 11.5px; color: var(--muted); }
+  .mob-list { padding: 4px 22px 120px; }
+  .mob-list h2 { font-size: 15px; color: var(--ink); margin: 0 0 10px; }
+  .mob-card {
+    background: var(--card); border: 1px solid var(--rail-bd); border-radius: 14px; padding: 14px; margin-bottom: 12px;
+    box-shadow: 0 10px 26px -14px rgba(0,0,0,.22);   /* 轻量投影，与背景略分离 */
+    transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out);
+    cursor: pointer;
+  }
+  .mob-card.is-lift {                                /* 手机端：点击委托时浮动（仅点击触发） */
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 20px 40px -16px rgba(0,0,0,.36);
+  }
+  .mob-card h3 { margin: 0 0 6px; font-size: 14px; color: var(--ink); }
+  .mob-card .mc-meta { font-size: 11.5px; color: var(--muted); display: flex; gap: 12px; }
+  .mob-card .mc-foot { display: flex; align-items: center; margin-top: 10px; }
+  .mob-card .mc-price { font-size: 17px; font-weight: 650; color: var(--ink); }
+  .mob-card .mc-take { margin-left: auto; font-size: 12px; padding: 8px 16px; border-radius: 999px; background: var(--accent); color: #fff; }
+
+  /* 手机端导航栏：立体椭圆 + 背景分离
+     ① 导航栏本身是悬浮胶囊（与页面背景分离，四周留白 + 投影 → 立体感）
+     ② 激活指示是内部「立体椭圆」(pill)，与导航栏底色分离（独立背景 + 内外阴影），
+        通过 transform: translateX 在 tab 间平移（280ms ease-out，无缩放弹跳） */
+  .mob-nav {
+    position: absolute; left: 18px; right: 18px; bottom: 18px; z-index: 8;
+    height: 60px; border-radius: 999px;
+    background: var(--nav-bg);
+    box-shadow: var(--nav-shadow);          /* 立体：浮起投影 */
+    display: flex; align-items: stretch; padding: 7px;
+  }
+  .mob-pill {
+    position: absolute; top: 7px; bottom: 7px; left: 7px;
+    width: calc((100% - 14px) / var(--n, 4));
+    border-radius: 999px;
+    background: var(--pill-bg);
+    box-shadow: var(--pill-shadow);          /* 立体椭圆：内浅外深双阴影 */
+    transform: translateX(calc(var(--idx, 0) * 100%));
+    transition: transform var(--dur) var(--ease-out), background-color var(--dur) var(--ease-out);
+    pointer-events: none;
+  }
+  .mob-item {
+    position: relative; z-index: 1; flex: 1; border: 0; background: none; cursor: pointer;
+    font-family: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px; color: var(--muted); font-size: 10.5px;
+    transition: color var(--dur) var(--ease-out);
+  }
+  .mob-item .mi-ico { font-size: 17px; line-height: 1; transition: transform var(--dur) var(--ease-out); }
+  .mob-item.is-on { color: var(--ink); font-weight: 600; }
+  .mob-item.is-on .mi-ico { /* 仅轻微上浮，不放大 */
+    transform: translateY(-1px);
+  }
+  /* 悬浮下划线（与 PC 一致的 scaleX 实现，用于非激活项的点击反馈也可复用） */
+  .mob-item::after {
+    content: ""; position: absolute; left: 28%; right: 28%; bottom: 7px; height: 2px;
+    background: var(--accent); border-radius: 2px;
+    transform: scaleX(0); transform-origin: center;
+    transition: transform var(--dur) var(--ease-out);
+  }
+  .mob-item.is-on::after { transform: scaleX(1); }
+
+  /* =================================================================
+     四套皮肤（只定义颜色 / 形态 token）
+     ================================================================= */
+  /* 01 便当盒 */
+  .skin-bento {
+    --paper:#f5f5f7; --card:#fff; --ink:#1d1d1f; --muted:#6e6e73; --subtle:#a1a1a6;
+    --accent:#0071e3; --hover:rgba(0,0,0,.05); --on-bg:#fff; --rail-bg:#f5f5f7; --rail-bd:#e8e8ed;
+    --topbar-bg:rgba(245,245,247,.82); --topbar-bg-scr:rgba(255,255,255,.94);
+    --topbar-shadow:0 1px 0 rgba(0,0,0,.06), 0 10px 30px -22px rgba(0,0,0,.45);
+    --nav-bg:rgba(255,255,255,.92); --nav-shadow:0 14px 30px -10px rgba(0,0,0,.3);
+    --pill-bg:#fff; --pill-shadow:-3px -3px 7px rgba(255,255,255,.9), 3px 3px 7px rgba(0,0,0,.12);
+  }
+  /* 02 新拟态 */
+  .skin-neu {
+    --paper:#e0e5ec; --card:#e0e5ec; --ink:#4d5866; --muted:#8a97a8; --subtle:#a7b2c0;
+    --accent:#6c9bd1; --hover:rgba(255,255,255,.4); --on-bg:#e0e5ec;
+    --rail-bg:#e0e5ec; --rail-bd:rgba(0,0,0,.06);
+    --topbar-bg:#e0e5ec; --topbar-bg-scr:#e3e8ee;
+    --topbar-shadow:0 4px 10px rgba(0,0,0,.08), inset 0 -1px 0 rgba(255,255,255,.6);
+    /* 同色系浮雕：外暗内亮 */
+    --nav-bg:#e0e5ec; --nav-shadow:-8px -8px 16px rgba(255,255,255,.7), 8px 8px 16px rgba(0,0,0,.18);
+    --pill-bg:#e0e5ec; --pill-shadow:inset 4px 4px 8px rgba(0,0,0,.14), inset -4px -4px 8px rgba(255,255,255,.8);
+  }
+  .skin-neu .pc-ind { background: #e0e5ec; box-shadow: inset 4px 4px 8px rgba(0,0,0,.12), inset -4px -4px 8px rgba(255,255,255,.8); }
+  .skin-neu .pc-search, .skin-neu .pc-stat, .skin-neu .pc-row i, .skin-neu .mob-search,
+  .skin-neu .mob-stat, .skin-neu .mob-card { box-shadow: -5px -5px 10px rgba(255,255,255,.7), 5px 5px 10px rgba(0,0,0,.12); border-color: transparent; }
+  .skin-neu .pc-pill-btn { box-shadow: -4px -4px 8px rgba(255,255,255,.7), 4px 4px 8px rgba(0,0,0,.18); }
+
+  /* 03 粗野主义 */
+  .skin-brut {
+    --paper:#fff; --card:#fff; --ink:#000; --muted:#222; --subtle:#555;
+    --accent:#ff4d00; --hover:#f2f2f2; --on-bg:#ffde00; --rail-bg:#fff; --rail-bd:#000;
+    --topbar-bg:#fff; --topbar-bg-scr:#ffde00;
+    --topbar-shadow:0 6px 0 #000;
+    --nav-bg:#fff; --nav-shadow:5px 5px 0 #000;
+    --pill-bg:#ffde00; --pill-shadow:3px 3px 0 var(--accent);
+  }
+  .skin-brut .pc-rail { border-right-width: 4px; }
+  .skin-brut .pc-item { border-radius: 0; border-bottom: 2px solid #000; padding: 12px; font-family: ui-monospace, Consolas, monospace; letter-spacing: .04em; }
+  .skin-brut .pc-ind { border-radius: 0; background: #ffde00; }
+  .skin-brut .pc-topbar { border-bottom-width: 4px; }
+  .skin-brut .pc-links a { font-family: ui-monospace, Consolas, monospace; letter-spacing: .06em; }
+  .skin-brut .pc-links a::after { height: 4px; }
+  .skin-brut .pc-search, .skin-brut .pc-stat, .skin-brut .mob-search,
+  .skin-brut .mob-stat, .skin-brut .mob-card { border: 3px solid #000; border-radius: 0; }
+  .skin-brut .pc-row i { border: 3px solid #000; border-radius: 0; }
+  .skin-brut .mob-item.is-on { color: #000; }   /* 黄底椭圆上的黑字，高对比 */
+  .skin-brut .mob-item::after { background: #ffde00; }
+  .skin-brut .mob-nav { border: 4px solid #000; border-radius: 999px; }
+  .skin-brut .mob-item { font-family: ui-monospace, Consolas, monospace; }
+  .skin-brut .mob-item::after { height: 4px; }
+  .skin-brut .pc-pill-btn { border: 3px solid #000; background:#000; color:#fff; }
+
+  /* 04 日式极简 */
+  .skin-jp {
+    --paper:#fafaf7; --card:#fff; --ink:#1a1a18; --muted:#6b675e; --subtle:#a09a8d;
+    --accent:#c3272b; --hover:rgba(0,0,0,.04); --on-bg:#fafaf7; --rail-bg:#fafaf7; --rail-bd:#d8d5cd;
+    --topbar-bg:rgba(250,250,247,.9); --topbar-bg-scr:#fff;
+    --topbar-shadow:0 1px 0 #e6e3db;
+    --nav-bg:rgba(250,250,247,.94); --nav-shadow:0 10px 26px -12px rgba(0,0,0,.28);
+    --pill-bg:#1a1a18; --pill-shadow:0 4px 10px -4px rgba(0,0,0,.5);
+  }
+  .skin-jp .pc-item { font-size: 13.5px; letter-spacing: .08em; }
+  .skin-jp .pc-brand, .skin-jp .pc-title { letter-spacing: .14em; }
+  .skin-jp .pc-links a { font-size: 12.5px; letter-spacing: .12em; }
+  .skin-jp .pc-links a::after { height: 1px; }
+  .skin-jp .mob-item { font-size: 10px; letter-spacing: .1em; }
+  .skin-jp .mob-item::after { height: 1px; }
+  .skin-jp .pc-ind { background: #efece6; }
+  .skin-bento .pc-ind { box-shadow: 0 1px 3px rgba(0,0,0,.10); }
+
+  /* 减弱动效偏好 */
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 1ms !important; }
+  }
+  @media (max-width: 760px) {
+    .params { display: none; }
+    .bar .hint { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand">校园委托 · 导航动效规范<span>PC + 手机端 · 同一套参数</span></div>
+  <div class="grp">
+    <label>视图</label>
+    <div class="seg" id="viewSeg">
+      <button data-view="pc" aria-pressed="true">桌面端</button>
+      <button data-view="mob" aria-pressed="false">手机端</button>
+    </div>
+  </div>
+  <div class="grp">
+    <label>风格</label>
+    <div class="seg" id="skinSeg">
+      <button data-skin="bento" aria-pressed="true">便当盒</button>
+      <button data-skin="neu" aria-pressed="false">新拟态</button>
+      <button data-skin="brut" aria-pressed="false">粗野</button>
+      <button data-skin="jp" aria-pressed="false">日式</button>
+    </div>
+  </div>
+  <div class="hint">侧栏可收起 · 滚动看吸顶栏变化 · 移动端点击下方导航切换</div>
+</header>
+
+<div class="params">
+  <table>
+    <tr><th>动画函数</th><td><code>ease-out</code>（cubic-bezier(0,0,0.58,1)）</td></tr>
+    <tr><th>时长</th><td><code>280ms</code> 全局统一</td></tr>
+    <tr><th>侧边栏展开</th><td><code>width</code> 平滑过渡（240px ↔ 76px）</td></tr>
+    <tr><th>悬浮下划线</th><td><code>transform: scaleX(0→1)</code>，<code>transform-origin:left</code></td></tr>
+    <tr><th>滚动导航</th><td><code>background-color</code> + <code>box-shadow</code> 渐变过渡，<code>height</code> 小幅过渡（64px → 54px）</td></tr>
+    <tr><th>约束</th><td><span class="tag">无弹跳</span><span class="tag">无回弹</span><span class="tag">无过度放大</span><span class="tag">轻量化</span> 适配 PC 网页；手机端立体椭圆导航同参数</td></tr>
+  </table>
+</div>
+
+<!-- ====================== 桌面端 ====================== -->
+<section class="stage" id="stagePc">
+  <div class="pc skin-bento nav-anim" id="pc">
+    <aside class="pc-rail">
+      <div class="pc-rail-head">
+        <span class="pc-logo">校</span>
+        <span class="pc-brand">校园委托</span>
+        <button class="pc-collapse" id="pcCollapse" aria-label="收起侧栏"><i>‹</i></button>
+      </div>
+      <nav class="pc-nav" id="pcNav">
+        <span class="pc-ind" id="pcInd"></span>
+        <a class="pc-item is-on"><span class="ico">⌂</span><span class="label">大厅</span></a>
+        <a class="pc-item"><span class="ico">✉</span><span class="label">消息</span></a>
+        <a class="pc-item"><span class="ico">＋</span><span class="label">发布委托</span></a>
+        <a class="pc-item"><span class="ico">▤</span><span class="label">我的订单</span></a>
+        <a class="pc-item"><span class="ico">◍</span><span class="label">我的</span></a>
+      </nav>
+      <div class="pc-rail-foot">信誉 100 · 已认证学生</div>
+    </aside>
+
+    <div class="pc-main" id="pcMain">
+      <header class="pc-topbar" id="pcTopbar">
+        <span class="pc-title">大厅</span>
+        <nav class="pc-links">
+          <a class="is-on">推荐</a>
+          <a>跑腿</a>
+          <a>文档</a>
+          <a>技能</a>
+          <a>摄影</a>
+        </nav>
+        <div class="pc-right">
+          <button class="pc-pill-btn">发布</button>
+          <span class="pc-avatar">满</span>
+        </div>
+      </header>
+
+      <div class="pc-hero">
+        <h1>同学，今天想做点什么？</h1>
+        <p>校园委托 · 把小事交给身边靠谱的人。</p>
+        <div class="pc-search">🔍 搜索委托 / 服务 / 同学…</div>
+      </div>
+      <div class="pc-stats">
+        <div class="pc-stat"><b>128</b><span>进行中委托</span></div>
+        <div class="pc-stat"><b>¥3.2k</b><span>本周成交额</span></div>
+        <div class="pc-stat"><b>96%</b><span>准时完成率</span></div>
+        <div class="pc-stat"><b>4.9</b><span>平均评分</span></div>
+      </div>
+      <div class="pc-list">
+        <h2>最新委托</h2>
+        <div class="pc-row"><i>🛵</i><div class="m"><b>代取快递（松园 3 号楼）</b><span class="meta">30 分钟内 · 押金 ¥50</span></div><span class="price">¥12</span></div>
+        <div class="pc-row"><i>📄</i><div class="m"><b>论文格式精修</b><span class="meta">明天 18:00 前 · 押金 ¥60</span></div><span class="price">¥80</span></div>
+        <div class="pc-row"><i>📚</i><div class="m"><b>图书馆代占座</b><span class="meta">图书馆 4 楼 · 押金 ¥20</span></div><span class="price">¥8</span></div>
+        <div class="pc-row"><i>📷</i><div class="m"><b>活动跟拍 2 小时</b><span class="meta">本周六 · 押金 ¥150</span></div><span class="price">¥200</span></div>
+        <div class="pc-row"><i>🍱</i><div class="m"><b>食堂代买午餐</b><span class="meta">11:30 前 · 押金 ¥30</span></div><span class="price">¥10</span></div>
+        <div class="pc-fill"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== 手机端 ====================== -->
+<section class="stage" id="stageMob" hidden>
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="phone-screen skin-bento nav-anim" id="mob">
+        <div class="mob-scroll" id="mobScroll">
+          <header class="mob-topbar" id="mobTopbar">
+            <span class="mt-title">大厅</span>
+            <span class="mt-avatar">满</span>
+          </header>
+          <div class="mob-hero">
+            <h1>同学，今天想做点什么？</h1>
+            <p>校园委托 · 把小事交给身边靠谱的人。</p>
+            <div class="mob-search">🔍 搜索委托 / 服务…</div>
+          </div>
+          <div class="mob-stats">
+            <div class="mob-stat"><b>128</b><span>进行中委托</span></div>
+            <div class="mob-stat"><b>¥3.2k</b><span>本周成交额</span></div>
+            <div class="mob-stat"><b>96%</b><span>准时完成率</span></div>
+            <div class="mob-stat"><b>4.9</b><span>平均评分</span></div>
+          </div>
+          <div class="mob-list">
+            <h2>最新委托</h2>
+            <div class="mob-card"><h3>代取快递（松园 3 号楼）</h3><div class="mc-meta"><span>30 分钟内</span><span>押金 ¥50</span></div><div class="mc-foot"><span class="mc-price">¥12</span><span class="mc-take">接单</span></div></div>
+            <div class="mob-card"><h3>论文格式精修</h3><div class="mc-meta"><span>明天 18:00</span><span>押金 ¥60</span></div><div class="mc-foot"><span class="mc-price">¥80</span><span class="mc-take">接单</span></div></div>
+            <div class="mob-card"><h3>图书馆代占座</h3><div class="mc-meta"><span>4 楼</span><span>押金 ¥20</span></div><div class="mc-foot"><span class="mc-price">¥8</span><span class="mc-take">接单</span></div></div>
+            <div class="mob-card"><h3>活动跟拍 2 小时</h3><div class="mc-meta"><span>本周六</span><span>押金 ¥150</span></div><div class="mc-foot"><span class="mc-price">¥200</span><span class="mc-take">接单</span></div></div>
+            <div class="mob-card"><h3>食堂代买午餐</h3><div class="mc-meta"><span>11:30 前</span><span>押金 ¥30</span></div><div class="mc-foot"><span class="mc-price">¥10</span><span class="mc-take">接单</span></div></div>
+            <div style="height:40px"></div>
+          </div>
+        </div>
+
+        <!-- 手机端导航栏：立体椭圆 + 背景分离 -->
+        <nav class="mob-nav" id="mobNav" style="--n:4">
+          <span class="mob-pill" id="mobPill"></span>
+          <button class="mob-item is-on" data-idx="0"><span class="mi-ico">⌂</span>大厅</button>
+          <button class="mob-item" data-idx="1"><span class="mi-ico">✉</span>消息</button>
+          <button class="mob-item" data-idx="2"><span class="mi-ico">＋</span>发布</button>
+          <button class="mob-item" data-idx="3"><span class="mi-ico">◍</span>我的</button>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    var root = document.body;
+
+    /* 视图切换（桌面 / 手机） */
+    var viewSeg = document.getElementById('viewSeg');
+    var stagePc = document.getElementById('stagePc');
+    var stageMob = document.getElementById('stageMob');
+    viewSeg.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      [].forEach.call(viewSeg.children, function (c) { c.setAttribute('aria-pressed', c === b); });
+      var v = b.getAttribute('data-view');
+      stagePc.hidden = v !== 'pc';
+      stageMob.hidden = v !== 'mob';
+    });
+
+    /* 风格切换（四套皮肤） */
+    var skinSeg = document.getElementById('skinSeg');
+    function applySkin(skin) {
+      var cls = 'skin-' + skin;
+      ['pc', 'mob'].forEach(function (id) {
+        var el = document.getElementById(id);
+        el.className = el.className.replace(/\bskin-\w+\b/g, '').trim() + ' ' + cls + ' nav-anim';
+      });
+    }
+    skinSeg.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      [].forEach.call(skinSeg.children, function (c) { c.setAttribute('aria-pressed', c === b); });
+      applySkin(b.getAttribute('data-skin'));
+    });
+
+    /* 桌面端：侧栏收起 */
+    var pc = document.getElementById('pc');
+    document.getElementById('pcCollapse').addEventListener('click', function () {
+      pc.classList.toggle('app-collapsed');
+    });
+
+    /* 桌面端：侧栏导航激活 + 滑动指示（与手机端同参数，不用椭圆包裹） */
+    var pcNav = document.getElementById('pcNav');
+    var pcInd = document.getElementById('pcInd');
+    function movePcInd(item) {
+      if (!item) return;
+      pcInd.style.height = item.offsetHeight + 'px';
+      pcInd.style.transform = 'translateY(' + item.offsetTop + 'px)';
+    }
+    [].forEach.call(document.querySelectorAll('#pc .pc-item'), function (item) {
+      item.addEventListener('click', function () {
+        [].forEach.call(document.querySelectorAll('#pc .pc-item'), function (x) { x.classList.remove('is-on'); });
+        item.classList.add('is-on');
+        movePcInd(item);
+      });
+    });
+    movePcInd(pcNav.querySelector('.pc-item.is-on'));
+
+    /* 桌面端：顶部导航链接点击 */
+    [].forEach.call(document.querySelectorAll('#pc .pc-links a'), function (a) {
+      a.addEventListener('click', function () {
+        [].forEach.call(document.querySelectorAll('#pc .pc-links a'), function (x) { x.classList.remove('is-on'); });
+        a.classList.add('is-on');
+      });
+    });
+
+    /* 桌面端：滚动导航（背景 / 阴影 / 高度过渡） */
+    var pcMain = document.getElementById('pcMain');
+    var pcTopbar = document.getElementById('pcTopbar');
+    pcMain.addEventListener('scroll', function () {
+      pcTopbar.classList.toggle('is-scrolled', pcMain.scrollTop > 8);
+    });
+
+    /* 手机端：导航指示椭圆移动 + 激活 */
+    var mobNav = document.getElementById('mobNav');
+    var mobPill = document.getElementById('mobPill');
+    [].forEach.call(document.querySelectorAll('#mobNav .mob-item'), function (it) {
+      it.addEventListener('click', function () {
+        [].forEach.call(document.querySelectorAll('#mobNav .mob-item'), function (x) { x.classList.remove('is-on'); });
+        it.classList.add('is-on');
+        mobPill.style.setProperty('--idx', it.getAttribute('data-idx'));
+      });
+    });
+
+    /* 手机端：滚动导航 */
+    var mobScroll = document.getElementById('mobScroll');
+    var mobTopbar = document.getElementById('mobTopbar');
+    mobScroll.addEventListener('scroll', function () {
+      mobTopbar.classList.toggle('is-scrolled', mobScroll.scrollTop > 8);
+    });
+
+    /* 手机端：点击委托 → 浮动（仅点击触发，单卡高亮） */
+    [].forEach.call(document.querySelectorAll('#mob .mob-card'), function (card) {
+      card.addEventListener('click', function () {
+        [].forEach.call(document.querySelectorAll('#mob .mob-card.is-lift'), function (c) {
+          if (c !== card) c.classList.remove('is-lift');
+        });
+        card.classList.toggle('is-lift');
+      });
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>校园委托 · 主界面四风格效果图</title>
+<style>
+  /* ============================================================
+     外壳（不属于任何风格，只负责切换与说明）
+     ============================================================ */
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #e9ebf0;
+    color: #14161f;
+    -webkit-font-smoothing: antialiased;
+  }
+  .shell {
+    position: sticky; top: 0; z-index: 99;
+    display: flex; align-items: center; gap: 18px;
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(20, 22, 31, 0.08);
+  }
+  .shell-brand { font-size: 14px; font-weight: 700; letter-spacing: 0.02em; white-space: nowrap; }
+  .shell-brand span { color: #8b90a3; font-weight: 500; margin-left: 8px; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tab {
+    appearance: none; border: 1px solid rgba(20, 22, 31, 0.1); background: #fff;
+    color: #4a4f63; font-size: 13px; font-weight: 600; padding: 7px 14px;
+    border-radius: 999px; cursor: pointer; transition: all 0.18s ease; font-family: inherit;
+  }
+  .tab:hover { border-color: rgba(20, 22, 31, 0.24); color: #14161f; }
+  .tab[aria-selected="true"] { background: #14161f; border-color: #14161f; color: #fff; }
+  .shell-hint { margin-left: auto; font-size: 12px; color: #8b90a3; white-space: nowrap; }
+
+  .stage { padding: 26px 24px 60px; }
+  .stage-meta {
+    max-width: 1240px; margin: 0 auto 14px;
+    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+  }
+  .stage-meta h2 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: 0.01em; }
+  .stage-meta p { margin: 0; font-size: 12.5px; color: #6b7080; line-height: 1.6; }
+  .stage-meta code {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px;
+    background: rgba(20, 22, 31, 0.06); padding: 2px 6px; border-radius: 4px; color: #4a4f63;
+  }
+  .mock {
+    max-width: 1240px; margin: 0 auto; overflow: hidden;
+    box-shadow: 0 24px 60px -30px rgba(20, 22, 31, 0.5), 0 2px 8px rgba(20, 22, 31, 0.06);
+  }
+  .stage[hidden] { display: none; }
+
+  @media (max-width: 820px) {
+    .shell { flex-wrap: wrap; gap: 10px; padding: 10px 14px; }
+    .shell-hint { display: none; }
+    .stage { padding: 18px 12px 44px; }
+  }
+
+  /* ============================================================
+     风格 01 · BENTO GRID（便当盒网格）
+     白/浅灰底 · 严格网格 · 20px 圆角 · 单一强调色 #0071e3
+     ============================================================ */
+  .s-bento {
+    --canvas: #f5f5f7; --ink: #1d1d1f; --muted: #6e6e73; --accent: #0071e3;
+    --r: 20px; --gap: 16px;
+    background: var(--canvas); color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    padding: 0 0 28px;
+  }
+  .b-nav {
+    display: flex; align-items: center; gap: 26px;
+    padding: 18px 32px;
+  }
+  .b-logo {
+    display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; letter-spacing: 0.01em;
+  }
+  .b-logo i {
+    width: 28px; height: 28px; border-radius: 8px; background: var(--ink); color: #fff;
+    display: grid; place-items: center; font-size: 13px; font-style: normal; font-weight: 700;
+  }
+  .b-links { display: flex; gap: 22px; font-size: 13.5px; color: var(--muted); }
+  .b-links b { color: var(--ink); font-weight: 600; }
+  .b-nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .b-credit {
+    font-size: 12.5px; color: var(--muted); background: #fff; border-radius: 999px;
+    padding: 6px 12px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+  .b-credit b { color: var(--ink); font-weight: 600; }
+  .b-avatar {
+    width: 34px; height: 34px; border-radius: 50%; background: #e8e8ed;
+    display: grid; place-items: center; font-size: 15px;
+  }
+  .b-hero { padding: 26px 32px 30px; }
+  .b-kicker { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
+  .b-hero h1 {
+    margin: 0; font-size: 44px; line-height: 1.14; font-weight: 650; letter-spacing: -0.02em;
+    max-width: 15em;
+  }
+  .b-hero h1 em { font-style: normal; color: var(--accent); }
+  .b-sub { margin: 12px 0 0; font-size: 15px; color: var(--muted); }
+  .b-search {
+    margin-top: 22px; display: flex; align-items: center; gap: 10px;
+    background: #fff; border-radius: 14px; padding: 15px 18px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 8px 24px -12px rgba(0, 0, 0, 0.18);
+    font-size: 14.5px; color: #a1a1a6;
+  }
+  .b-search kbd {
+    margin-left: auto; font-family: inherit; font-size: 11.5px; color: #86868b;
+    border: 1px solid #e5e5ea; border-radius: 6px; padding: 2px 7px;
+  }
+  .b-intents { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .b-intents span {
+    font-size: 13px; color: #4a4a4f; background: #fff; border-radius: 999px; padding: 7px 14px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  .b-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap);
+    padding: 0 32px; grid-auto-rows: 150px; grid-auto-flow: dense;
+  }
+  .b-card {
+    background: #fff; border-radius: var(--r); padding: 20px;
+    display: flex; flex-direction: column; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .b-card:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -16px rgba(0, 0, 0, 0.3); }
+  .b-card.t1 { background: #eef2ff; }
+  .b-card.t2 { background: #f5f0ff; }
+  .b-card.t3 { background: #e8f5ee; }
+  .b-card.t4 { background: #fff7e6; }
+  .b-card.dark { background: #1d1d1f; color: #fff; }
+  .b-big { grid-column: span 2; grid-row: span 2; }
+  .b-wide { grid-column: span 2; }
+  .b-ico {
+    width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center;
+    font-size: 18px; background: rgba(255, 255, 255, 0.72); margin-bottom: 12px;
+  }
+  .b-card h3 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+  .b-card p { margin: 5px 0 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+  .b-num { font-size: 34px; font-weight: 650; letter-spacing: -0.03em; line-height: 1; }
+  .b-num small { font-size: 15px; font-weight: 500; color: var(--muted); margin-left: 2px; }
+  .b-card.dark .b-num small, .b-card.dark p { color: rgba(255, 255, 255, 0.62); }
+  .b-card.dark .b-ico { background: rgba(255, 255, 255, 0.14); }
+  .b-list-head {
+    display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px;
+  }
+  .b-list-head h3 { font-size: 17px; }
+  .b-list-head span { margin-left: auto; font-size: 12.5px; color: var(--accent); font-weight: 600; }
+  .b-row {
+    display: flex; align-items: center; gap: 12px; padding: 11px 0;
+    border-top: 1px solid #f0f0f3;
+  }
+  .b-row:first-of-type { border-top: none; }
+  .b-row i {
+    width: 32px; height: 32px; border-radius: 10px; background: #f5f5f7;
+    display: grid; place-items: center; font-style: normal; font-size: 15px; flex: none;
+  }
+  .b-row .b-row-main { min-width: 0; }
+  .b-row .b-row-main b {
+    display: block; font-size: 13.5px; font-weight: 600; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .b-row .b-row-main span { font-size: 12px; color: var(--muted); }
+  .b-price { margin-left: auto; font-size: 15px; font-weight: 650; letter-spacing: -0.01em; }
+  .b-price small { font-size: 11px; font-weight: 500; color: var(--muted); }
+  .b-cta {
+    margin-top: auto; display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13.5px; font-weight: 600; color: var(--accent);
+  }
+  .b-foot {
+    display: flex; gap: 26px; padding: 18px 32px 0; font-size: 12px; color: #a1a1a6;
+  }
+
+  /* ============================================================
+     风格 02 · NEO-NEUMORPHISM（新拟态 / Soft UI）
+     同色底 #e0e5ec · 双阴影浮雕 · 中灰文字 · 凹陷输入框
+     ============================================================ */
+  .s-neu {
+    --bg: #e0e5ec; --ink: #5f6b7a; --muted: #8a97a8; --accent: #6c9bd1;
+    --raised: -6px -6px 12px rgba(255, 255, 255, 0.8), 6px 6px 12px rgba(0, 0, 0, 0.12);
+    --raised-sm: -4px -4px 8px rgba(255, 255, 255, 0.8), 4px 4px 8px rgba(0, 0, 0, 0.1);
+    --pressed: inset 4px 4px 8px rgba(0, 0, 0, 0.12), inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+    background: var(--bg); color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    padding: 22px 32px 34px;
+  }
+  .n-nav { display: flex; align-items: center; gap: 14px; }
+  .n-logo {
+    width: 44px; height: 44px; border-radius: 50%; background: var(--bg); box-shadow: var(--raised);
+    display: grid; place-items: center; font-size: 15px; font-weight: 700; color: var(--accent);
+  }
+  .n-links { display: flex; gap: 10px; margin-left: 10px; }
+  .n-links span {
+    font-size: 13px; padding: 9px 18px; border-radius: 999px; background: var(--bg);
+    box-shadow: var(--raised-sm); color: var(--muted);
+  }
+  .n-links span.on { box-shadow: var(--pressed); color: var(--ink); font-weight: 600; }
+  .n-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .n-pill {
+    font-size: 12.5px; padding: 9px 16px; border-radius: 999px; background: var(--bg);
+    box-shadow: var(--raised-sm);
+  }
+  .n-pill b { color: var(--ink); }
+  .n-avatar {
+    width: 44px; height: 44px; border-radius: 50%; background: var(--bg); box-shadow: var(--raised);
+    display: grid; place-items: center; font-size: 14px; color: #64707f;
+  }
+  .n-hero { padding: 40px 0 30px; }
+  .n-hero .n-hi { font-size: 13.5px; color: var(--muted); margin: 0 0 12px; letter-spacing: 0.02em; }
+  .n-hero h1 {
+    margin: 0; font-size: 36px; line-height: 1.28; font-weight: 600; color: #4d5866; letter-spacing: 0.01em;
+  }
+  .n-search {
+    margin-top: 26px; display: flex; align-items: center; gap: 12px;
+    background: var(--bg); border-radius: 999px; box-shadow: var(--pressed);
+    padding: 16px 22px; font-size: 14.5px; color: var(--muted);
+  }
+  .n-search .n-go {
+    margin-left: auto; width: 36px; height: 36px; border-radius: 50%; background: var(--bg);
+    box-shadow: var(--raised-sm); display: grid; place-items: center; color: var(--accent); font-size: 14px;
+  }
+  .n-intents { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .n-intents span {
+    font-size: 13px; padding: 10px 18px; border-radius: 999px; background: var(--bg);
+    box-shadow: var(--raised-sm); color: #64707f;
+  }
+  .n-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 8px 0 30px; }
+  .n-stat {
+    background: var(--bg); border-radius: 22px; box-shadow: var(--raised); padding: 20px 22px;
+  }
+  .n-stat b { display: block; font-size: 26px; font-weight: 600; color: #4d5866; letter-spacing: 0.01em; }
+  .n-stat span { font-size: 12.5px; color: var(--muted); }
+  .n-sect-head { display: flex; align-items: center; margin-bottom: 16px; }
+  .n-sect-head h2 { margin: 0; font-size: 16px; font-weight: 600; color: #4d5866; letter-spacing: 0.02em; }
+  .n-sect-head .n-sort { margin-left: auto; display: flex; gap: 8px; }
+  .n-sect-head .n-sort span {
+    font-size: 12px; padding: 8px 15px; border-radius: 999px; background: var(--bg);
+    box-shadow: var(--raised-sm); color: var(--muted);
+  }
+  .n-sect-head .n-sort span.on { box-shadow: var(--pressed); color: var(--ink); }
+  .n-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .n-card {
+    background: var(--bg); border-radius: 24px; box-shadow: var(--raised); padding: 22px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .n-card-top { display: flex; align-items: center; gap: 12px; }
+  .n-ico {
+    width: 42px; height: 42px; border-radius: 50%; background: var(--bg); box-shadow: var(--raised-sm);
+    display: grid; place-items: center; font-size: 14px; color: #64707f; letter-spacing: 0; flex: none;
+  }
+  .n-glyph { filter: grayscale(1); opacity: 0.55; font-size: 13px; }
+  .n-cat { font-size: 11.5px; color: var(--muted); letter-spacing: 0.08em; }
+  .n-cat b { display: block; font-size: 12.5px; color: #64707f; font-weight: 600; letter-spacing: 0.02em; }
+  .n-card h3 { margin: 0; font-size: 15.5px; line-height: 1.5; font-weight: 600; color: #4d5866; }
+  .n-meta { display: flex; gap: 14px; font-size: 12px; color: var(--muted); }
+  .n-meta span + span::before { content: "·"; margin-right: 10px; color: #b3bdc9; }
+  .n-card-foot { display: flex; align-items: center; margin-top: 2px; }
+  .n-money { font-size: 20px; font-weight: 600; color: #4d5866; }
+  .n-money small { font-size: 11.5px; color: var(--muted); font-weight: 400; margin-left: 3px; }
+  .n-take {
+    margin-left: auto; font-size: 13px; padding: 11px 22px; border-radius: 999px; background: var(--bg);
+    box-shadow: var(--raised-sm); color: var(--accent); font-weight: 600;
+  }
+  .n-note {
+    margin-top: 22px; background: var(--bg); border-radius: 22px; box-shadow: var(--pressed);
+    padding: 18px 22px; font-size: 13px; color: var(--muted); line-height: 1.7;
+  }
+  .n-note b { color: #64707f; font-weight: 600; }
+
+  /* ============================================================
+     风格 03 · BRUTALISM（粗野主义）
+     纯黑白 + 硬边框 + 直角 + 硬偏移阴影 + 黄/橙两色点缀
+     ============================================================ */
+  .s-brut {
+    --ink: #000; --paper: #fff; --yellow: #ffde00; --orange: #ff4d00;
+    background: var(--paper); color: var(--ink);
+    font-family: "Arial Black", "Helvetica Neue", Impact, "Microsoft YaHei", sans-serif;
+    border: 4px solid #000;
+  }
+  .r-nav {
+    display: flex; align-items: center; gap: 0; border-bottom: 4px solid #000; background: #fff;
+  }
+  .r-logo {
+    background: #000; color: #fff; padding: 16px 20px; font-size: 15px; letter-spacing: 0.06em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .r-links { display: flex; }
+  .r-links span {
+    padding: 16px 18px; font-size: 12px; letter-spacing: 0.08em; border-right: 3px solid #000;
+    font-family: ui-monospace, Consolas, monospace; font-weight: 700;
+  }
+  .r-links span.on { background: var(--yellow); }
+  .r-nav .r-btn {
+    margin-left: auto; background: var(--yellow); border-left: 4px solid #000; padding: 16px 22px;
+    font-size: 12.5px; letter-spacing: 0.08em;
+  }
+  .r-hero { padding: 40px 34px 34px; border-bottom: 4px solid #000; }
+  .r-tagline { display: flex; gap: 10px; margin-bottom: 22px; }
+  .r-tagline span {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; letter-spacing: 0.12em;
+    border: 3px solid #000; padding: 5px 9px; background: #fff;
+  }
+  .r-tagline span.hot { background: var(--orange); color: #fff; border-color: #000; }
+  .r-hero h1 {
+    margin: 0; font-size: 74px; line-height: 1.08; letter-spacing: -0.03em; text-transform: none;
+  }
+  .r-hero h1 mark {
+    background: var(--yellow); color: #000; padding: 2px 10px 6px;
+    display: inline-block; line-height: 1; margin-right: 10px;
+  }
+  .r-hero .r-sub {
+    margin: 20px 0 0; font-family: ui-monospace, Consolas, monospace; font-size: 13px;
+    letter-spacing: 0.02em; max-width: 46em; line-height: 1.7;
+  }
+  .r-search {
+    margin-top: 26px; display: flex; align-items: center; gap: 12px;
+    border: 4px solid #000; box-shadow: 6px 6px 0 #000; padding: 16px 18px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 14px; background: #fff;
+  }
+  .r-search .r-key {
+    margin-left: auto; border: 3px solid #000; padding: 3px 8px; font-size: 11px; letter-spacing: 0.08em;
+  }
+  .r-intents { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .r-intents span {
+    border: 3px solid #000; padding: 8px 12px; font-size: 12px; letter-spacing: 0.06em;
+    font-family: ui-monospace, Consolas, monospace; background: #fff; box-shadow: 3px 3px 0 #000;
+  }
+  .r-stats { display: grid; grid-template-columns: repeat(4, 1fr); background: #000; color: #fff; }
+  .r-stat { padding: 22px 26px; border-right: 3px solid #fff; }
+  .r-stat:last-child { border-right: none; }
+  .r-stat b { display: block; font-size: 40px; line-height: 1; letter-spacing: -0.02em; color: var(--yellow); }
+  .r-stat span {
+    display: block; margin-top: 8px; font-size: 11px; letter-spacing: 0.14em;
+    font-family: ui-monospace, Consolas, monospace; color: #fff;
+  }
+  .r-body { padding: 30px 34px 36px; }
+  .r-head { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 18px; }
+  .r-head h2 { margin: 0; font-size: 30px; letter-spacing: -0.02em; }
+  .r-head .r-count {
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; border: 3px solid #000;
+    padding: 4px 9px; margin-bottom: 4px;
+  }
+  .r-head .r-more {
+    margin-left: auto; font-family: ui-monospace, Consolas, monospace; font-size: 12px;
+    letter-spacing: 0.1em; text-decoration: underline; text-underline-offset: 4px;
+  }
+  .r-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .r-card {
+    border: 4px solid #000; box-shadow: 6px 6px 0 #000; background: #fff; display: flex; flex-direction: column;
+  }
+  .r-card.feature { background: var(--yellow); }
+  .r-card-top {
+    display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 3px solid #000;
+  }
+  .r-card-top .r-idx {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; letter-spacing: 0.1em;
+  }
+  .r-card-top .r-type {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11px; letter-spacing: 0.08em;
+    border: 2px solid #000; padding: 2px 7px; background: #fff;
+  }
+  .r-card-top .r-state {
+    margin-left: auto; font-family: ui-monospace, Consolas, monospace; font-size: 10.5px;
+    letter-spacing: 0.1em; background: #000; color: #fff; padding: 3px 7px;
+  }
+  .r-card-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+  .r-card-body h3 { margin: 0; font-size: 21px; line-height: 1.2; letter-spacing: -0.02em; }
+  .r-card-meta {
+    font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; letter-spacing: 0.02em;
+    display: flex; gap: 14px; flex-wrap: wrap;
+  }
+  .r-card-foot { display: flex; align-items: center; margin-top: auto; }
+  .r-card-foot .r-money { font-size: 30px; letter-spacing: -0.03em; }
+  .r-card-foot .r-take {
+    margin-left: auto; border: 4px solid #000; background: #000; color: #fff;
+    padding: 9px 16px; font-size: 12px; letter-spacing: 0.1em;
+    font-family: ui-monospace, Consolas, monospace;
+  }
+  .r-card.feature .r-take { background: var(--orange); border-color: #000; color: #fff; }
+  .r-foot {
+    background: #000; color: #fff; display: flex; align-items: center; gap: 18px;
+    padding: 16px 24px; font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; letter-spacing: 0.1em;
+  }
+  .r-foot b { color: var(--yellow); }
+
+  /* ============================================================
+     风格 04 · JAPANESE MINIMAL（日式极简）
+     米白 #fafaf7 · 衬线 · 大留白 · 1px 细线 · 单一朱红
+     ============================================================ */
+  .s-jp {
+    --paper: #fafaf7; --ink: #1a1a18; --muted: #6b675e; --subtle: #a09a8d;
+    --line: #d8d5cd; --vermilion: #c3272b;
+    background: var(--paper); color: var(--ink);
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif SC", "Songti SC", "SimSun", Georgia, serif;
+    padding: 0 56px 0;
+  }
+  .j-nav {
+    display: flex; align-items: center; gap: 34px;
+    padding: 26px 0; border-bottom: 1px solid var(--line);
+  }
+  .j-logo { font-size: 17px; letter-spacing: 0.22em; }
+  .j-links {
+    display: flex; gap: 26px; margin-left: auto;
+    font-family: "Hiragino Kaku Gothic ProN", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 11.5px; letter-spacing: 0.22em; color: var(--muted);
+  }
+  .j-links b { color: var(--ink); font-weight: 400; }
+  .j-hero { padding: 96px 0 78px; display: flex; gap: 60px; align-items: flex-start; }
+  .j-hero-main { flex: 1; min-width: 0; }
+  .j-eyebrow {
+    font-family: "Hiragino Kaku Gothic ProN", "PingFang SC", sans-serif;
+    font-size: 10.5px; letter-spacing: 0.34em; color: var(--subtle); margin: 0 0 34px;
+  }
+  .j-hero h1 {
+    margin: 0; font-size: 52px; line-height: 1.42; font-weight: 400; letter-spacing: 0.06em;
+    max-width: 13em;
+  }
+  .j-hero h1 em { font-style: normal; border-bottom: 1px solid var(--ink); padding-bottom: 2px; }
+  .j-hero .j-sub {
+    margin: 34px 0 0; font-size: 15px; line-height: 2; letter-spacing: 0.04em; color: var(--muted);
+    max-width: 32em;
+  }
+  .j-search {
+    margin-top: 54px; display: flex; align-items: center; gap: 14px;
+    border-bottom: 1px solid var(--ink); padding: 0 0 12px;
+    font-size: 14px; color: var(--subtle); letter-spacing: 0.04em;
+  }
+  .j-search .j-mark {
+    font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 10.5px;
+    letter-spacing: 0.24em; color: var(--muted); margin-left: auto;
+  }
+  .j-seal {
+    width: 66px; height: 66px; background: var(--vermilion); color: #fff; flex: none;
+    display: grid; place-items: center; font-size: 15px; letter-spacing: 0.1em; line-height: 1.3;
+    text-align: center; transform: rotate(-2deg); margin-top: 8px;
+  }
+  .j-stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+  .j-stat { padding: 34px 0 34px 0; }
+  .j-stat + .j-stat { padding-left: 34px; border-left: 1px solid var(--line); }
+  .j-stat b { display: block; font-size: 30px; font-weight: 400; letter-spacing: 0.04em; line-height: 1; }
+  .j-stat b small { font-size: 12px; color: var(--subtle); margin-left: 4px; letter-spacing: 0.1em; }
+  .j-stat span {
+    display: block; margin-top: 14px; font-family: "Hiragino Kaku Gothic ProN", "PingFang SC", sans-serif;
+    font-size: 11px; letter-spacing: 0.24em; color: var(--muted);
+  }
+  .j-list-head {
+    display: flex; align-items: baseline; gap: 20px; padding: 96px 0 0;
+  }
+  .j-list-head h2 { margin: 0; font-size: 24px; font-weight: 400; letter-spacing: 0.16em; }
+  .j-list-head .j-sort {
+    margin-left: auto; display: flex; gap: 22px;
+    font-family: "Hiragino Kaku Gothic ProN", "PingFang SC", sans-serif;
+    font-size: 11px; letter-spacing: 0.2em; color: var(--subtle);
+  }
+  .j-list-head .j-sort b { color: var(--ink); font-weight: 400; }
+  .j-list { margin-top: 44px; }
+  .j-item {
+    display: flex; align-items: flex-start; gap: 30px; padding: 30px 0;
+    border-top: 1px solid var(--line);
+  }
+  .j-item:last-child { border-bottom: 1px solid var(--line); }
+  .j-item .j-no {
+    font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 11px; letter-spacing: 0.16em;
+    color: var(--subtle); padding-top: 9px; width: 34px; flex: none;
+  }
+  .j-item .j-main { flex: 1; min-width: 0; }
+  .j-item h3 {
+    margin: 0; font-size: 21px; font-weight: 400; letter-spacing: 0.04em; line-height: 1.6;
+  }
+  .j-item .j-meta {
+    margin-top: 12px; display: flex; gap: 26px; flex-wrap: wrap;
+    font-family: "Hiragino Kaku Gothic ProN", "PingFang SC", sans-serif;
+    font-size: 11px; letter-spacing: 0.16em; color: var(--muted);
+  }
+  .j-item .j-money {
+    font-size: 20px; letter-spacing: 0.02em; padding-top: 4px; flex: none;
+    width: 92px; text-align: right;
+  }
+  .j-item .j-money small { font-size: 11px; color: var(--subtle); margin-left: 3px; }
+  .j-item .j-state {
+    font-family: "Hiragino Kaku Gothic ProN", "PingFang SC", sans-serif;
+    font-size: 10.5px; letter-spacing: 0.2em; color: var(--subtle); width: 68px; text-align: right; padding-top: 10px;
+  }
+  .j-foot {
+    margin-top: 96px; border-top: 1px solid var(--line); padding: 34px 0 46px;
+    display: flex; align-items: flex-start; gap: 40px;
+    font-family: "Hiragino Kaku Gothic ProN", "PingFang SC", sans-serif;
+    font-size: 10.5px; letter-spacing: 0.2em; color: var(--subtle);
+  }
+  .j-foot .j-sign { margin-left: auto; writing-mode: vertical-rl; letter-spacing: 0.34em; color: var(--muted); }
+
+  @media (max-width: 900px) {
+    .b-grid { grid-template-columns: repeat(2, 1fr); padding: 0 20px; }
+    .b-big { grid-column: span 2; grid-row: span 2; }
+    .b-wide { grid-column: span 2; }
+    .b-hero, .b-nav, .b-foot { padding-left: 20px; padding-right: 20px; }
+    .b-hero h1 { font-size: 32px; }
+    .n-grid, .r-cards { grid-template-columns: 1fr; }
+    .n-stats, .r-stats, .j-stats { grid-template-columns: repeat(2, 1fr); }
+    .n-nav, .s-neu { padding-left: 18px; padding-right: 18px; }
+    .r-hero h1 { font-size: 42px; }
+    .r-hero, .r-body { padding-left: 18px; padding-right: 18px; }
+    .s-jp { padding: 0 20px; }
+    .j-hero { padding: 56px 0 44px; flex-direction: column-reverse; gap: 26px; }
+    .j-hero h1 { font-size: 32px; }
+    .j-list-head { padding-top: 56px; }
+    .j-foot { margin-top: 56px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="shell">
+  <div class="shell-brand">校园委托 · 主界面四风格<span>同一套内容，四种视觉语言</span></div>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-go="bento">01 便当盒</button>
+    <button class="tab" role="tab" aria-selected="false" data-go="neu">02 新拟态</button>
+    <button class="tab" role="tab" aria-selected="false" data-go="brut">03 粗野主义</button>
+    <button class="tab" role="tab" aria-selected="false" data-go="jp">04 日式极简</button>
+  </nav>
+  <div class="shell-hint">按 1 / 2 / 3 / 4 切换 · 可打印为 PDF</div>
+</header>
+
+<!-- ================= 01 BENTO GRID ================= -->
+<section class="stage" data-view="bento">
+  <div class="stage-meta">
+    <h2>01 · Bento Grid 便当盒</h2>
+    <p>内容切成严格对齐的卡片：2×2 大卡放委托列表，1×1 小卡放数据，底色低饱和，全站只有一个强调色。</p>
+    <code>grid-auto-rows:150px · radius 20 · gap 16 · accent #0071e3</code>
+  </div>
+  <div class="mock s-bento">
+    <nav class="b-nav">
+      <div class="b-logo"><i>校</i>校园委托</div>
+      <div class="b-links"><b>大厅</b><span>消息</span><span>发布</span><span>订单</span><span>我的</span></div>
+      <div class="b-nav-right">
+        <span class="b-credit">信誉 <b>100</b></span>
+        <div class="b-avatar">🐰</div>
+      </div>
+    </nav>
+
+    <div class="b-hero">
+      <p class="b-kicker">午后好，林小满 · 视觉传达 · 大二</p>
+      <h1>今天需要帮忙做点<em>什么</em>？</h1>
+      <p class="b-sub">11 条委托正在等待接取，平均 3 分钟就有人响应。</p>
+      <div class="b-search">🔍 搜索委托：标题、地点、要求…<kbd>⌘K</kbd></div>
+      <div class="b-intents">
+        <span>帮我取快递</span><span>PPT 美化</span><span>打印装订</span><span>找辅导</span>
+      </div>
+    </div>
+
+    <div class="b-grid">
+      <div class="b-card b-big">
+        <div class="b-list-head">
+          <h3>最新委托</h3>
+          <span>全部 11 条 →</span>
+        </div>
+        <div class="b-row">
+          <i>🛵</i>
+          <div class="b-row-main"><b>帮买一杯奶茶送到松园 3 号楼</b><span>代取代买 · 松园 3 号楼 · 30 分钟内</span></div>
+          <div class="b-price">¥8</div>
+        </div>
+        <div class="b-row">
+          <i>📄</i>
+          <div class="b-row-main"><b>课程结课 PPT 美化，20 页左右</b><span>文档制作 · 线上 · 明天 18:00</span></div>
+          <div class="b-price">¥60</div>
+        </div>
+        <div class="b-row">
+          <i>📚</i>
+          <div class="b-row-main"><b>高数期中救命，第三章到第五章</b><span>学习辅导 · 图书馆 4 楼 · 后天</span></div>
+          <div class="b-price">¥80</div>
+        </div>
+        <div class="b-row">
+          <i>📷</i>
+          <div class="b-row-main"><b>毕业照跟拍，竹园到图书馆一路</b><span>拍照拍摄 · 竹园 · 本周六</span></div>
+          <div class="b-price">¥150</div>
+        </div>
+        <div class="b-cta">查看全部委托 →</div>
+      </div>
+
+      <div class="b-card">
+        <div class="b-ico">📮</div>
+        <div class="b-num">12</div>
+        <p>我发布的</p>
+      </div>
+      <div class="b-card t1">
+        <div class="b-ico">🤝</div>
+        <div class="b-num">8</div>
+        <p>我接取的</p>
+      </div>
+      <div class="b-card t3">
+        <div class="b-ico">✅</div>
+        <div class="b-num">26</div>
+        <p>我完成的</p>
+      </div>
+      <div class="b-card t4">
+        <div class="b-ico">⭐</div>
+        <div class="b-num">4.8<small>分</small></div>
+        <p>我的评分</p>
+      </div>
+
+      <div class="b-card b-wide dark">
+        <div class="b-ico">📌</div>
+        <h3>平台公告：期末周代取件延时说明</h3>
+        <p>12 月 18 日起，松园、兰园代取件默认延时 15 分钟，请发布时预留时间。</p>
+      </div>
+      <div class="b-card t2">
+        <div class="b-ico">🛵</div>
+        <h3>代取代买</h3>
+        <p>4 条</p>
+      </div>
+      <div class="b-card t2">
+        <div class="b-ico">📄</div>
+        <h3>文档制作</h3>
+        <p>3 条</p>
+      </div>
+
+      <div class="b-card">
+        <div class="b-ico">📚</div>
+        <h3>学习辅导</h3>
+        <p>2 条</p>
+      </div>
+      <div class="b-card">
+        <div class="b-ico">📷</div>
+        <h3>拍照拍摄</h3>
+        <p>2 条</p>
+      </div>
+      <div class="b-card b-wide t1">
+        <div class="b-ico">🔐</div>
+        <h3>接单需缴押金 ¥50–200，验收后原路返还</h3>
+        <p>押金不低于报酬；被投诉成立扣 50%，余额退回钱包。</p>
+        <div class="b-cta">去发布委托 →</div>
+      </div>
+    </div>
+
+    <div class="b-foot">
+      <span>校园委托 · 学生互助平台</span><span>报酬上限 ¥200</span><span>信誉低于 60 分禁止交易</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 02 NEO-NEUMORPHISM ================= -->
+<section class="stage" data-view="neu" hidden>
+  <div class="stage-meta">
+    <h2>02 · Neo-Neumorphism 新拟态</h2>
+    <p>背景与卡片同色，靠左上亮、右下暗的双阴影挤出浮雕；搜索框做凹陷，文字全部中灰，浮雕元素控制在四成以内。</p>
+    <code>bg #e0e5ec · raised ±6px · pressed inset 4px · accent #6c9bd1</code>
+  </div>
+  <div class="mock s-neu">
+    <nav class="n-nav">
+      <div class="n-logo">校</div>
+      <div class="n-links">
+        <span class="on">大厅</span><span>消息</span><span>发布</span><span>订单</span><span>我的</span>
+      </div>
+      <div class="n-right">
+        <span class="n-pill">信誉 <b>100</b></span>
+        <div class="n-avatar">满</div>
+      </div>
+    </nav>
+
+    <div class="n-hero">
+      <p class="n-hi">午后好，林小满 · 视觉传达 · 大二</p>
+      <h1>今天需要帮忙<br />做点什么？</h1>
+      <div class="n-search"><span class="n-glyph">🔍</span> 搜索委托：标题、地点、要求…<span class="n-go">→</span></div>
+      <div class="n-intents">
+        <span>帮我取快递</span><span>PPT 美化</span><span>打印装订</span><span>找辅导</span>
+      </div>
+    </div>
+
+    <div class="n-stats">
+      <div class="n-stat"><b>12</b><span>我发布的</span></div>
+      <div class="n-stat"><b>8</b><span>我接取的</span></div>
+      <div class="n-stat"><b>26</b><span>我完成的</span></div>
+      <div class="n-stat"><b>4.8</b><span>我的评分</span></div>
+    </div>
+
+    <div class="n-sect-head">
+      <h2>最新委托 · 11 条</h2>
+      <div class="n-sort"><span class="on">最新</span><span>报酬</span><span>截止</span></div>
+    </div>
+
+    <div class="n-grid">
+      <div class="n-card">
+        <div class="n-card-top">
+          <div class="n-ico">取</div>
+          <div class="n-cat"><b>代取代买</b>30 分钟内</div>
+        </div>
+        <h3>帮买一杯奶茶送到松园 3 号楼</h3>
+        <div class="n-meta"><span>松园 3 号楼</span><span>押金 ¥50</span></div>
+        <div class="n-card-foot">
+          <div class="n-money">¥8<small>报酬</small></div>
+          <div class="n-take">接单</div>
+        </div>
+      </div>
+
+      <div class="n-card">
+        <div class="n-card-top">
+          <div class="n-ico">文</div>
+          <div class="n-cat"><b>文档制作</b>明天 18:00</div>
+        </div>
+        <h3>课程结课 PPT 美化，20 页左右</h3>
+        <div class="n-meta"><span>线上交付</span><span>押金 ¥60</span></div>
+        <div class="n-card-foot">
+          <div class="n-money">¥60<small>报酬</small></div>
+          <div class="n-take">接单</div>
+        </div>
+      </div>
+
+      <div class="n-card">
+        <div class="n-card-top">
+          <div class="n-ico">学</div>
+          <div class="n-cat"><b>学习辅导</b>后天</div>
+        </div>
+        <h3>高数期中救命，第三章到第五章</h3>
+        <div class="n-meta"><span>图书馆 4 楼</span><span>押金 ¥80</span></div>
+        <div class="n-card-foot">
+          <div class="n-money">¥80<small>报酬</small></div>
+          <div class="n-take">接单</div>
+        </div>
+      </div>
+
+      <div class="n-card">
+        <div class="n-card-top">
+          <div class="n-ico">拍</div>
+          <div class="n-cat"><b>拍照拍摄</b>本周六</div>
+        </div>
+        <h3>毕业照跟拍，竹园到图书馆一路</h3>
+        <div class="n-meta"><span>竹园集合</span><span>押金 ¥150</span></div>
+        <div class="n-card-foot">
+          <div class="n-money">¥150<small>报酬</small></div>
+          <div class="n-take">接单</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="n-note">
+      <b>接单规则</b>　押金 ¥50–200 且不低于报酬，验收通过后原路返还；被投诉成立扣 50%，余额退回钱包。信誉低于 60 分无法接单。
+    </div>
+  </div>
+</section>
+
+<!-- ================= 03 BRUTALISM ================= -->
+<section class="stage" data-view="brut" hidden>
+  <div class="stage-meta">
+    <h2>03 · Brutalism 粗野主义</h2>
+    <p>4px 纯黑硬边框、直角、无模糊的硬偏移阴影；黄色与橙红两种原色做反色块，标题放大到溢出网格。</p>
+    <code>radius 0 · border 4px #000 · shadow 6px 6px 0 · #ffde00 / #ff4d00</code>
+  </div>
+  <div class="mock s-brut">
+    <nav class="r-nav">
+      <div class="r-logo">▣ 校园委托</div>
+      <div class="r-links"><span class="on">大厅</span><span>消息</span><span>发布</span><span>订单</span><span>我的</span></div>
+      <div class="r-btn">发布委托 ↗</div>
+    </nav>
+
+    <div class="r-hero">
+      <div class="r-tagline">
+        <span class="hot">11 条委托在线</span>
+        <span>学生互助 / 校内 3 分钟响应</span>
+        <span>报酬上限 ¥200</span>
+      </div>
+      <h1>今天需要<br /><mark>帮忙</mark>做点什么？</h1>
+      <p class="r-sub">校园委托是校内的互助平台：发一条委托，写清类型、地点和时间，等人接单。<br />押金 ¥50–200，验收后原路返还。</p>
+      <div class="r-search">🔍 搜索委托：标题、地点、要求…<span class="r-key">ENTER</span></div>
+      <div class="r-intents">
+        <span>帮我取快递</span><span>PPT 美化</span><span>打印装订</span><span>找辅导</span>
+      </div>
+    </div>
+
+    <div class="r-stats">
+      <div class="r-stat"><b>12</b><span>我发布的</span></div>
+      <div class="r-stat"><b>8</b><span>我接取的</span></div>
+      <div class="r-stat"><b>26</b><span>我完成的</span></div>
+      <div class="r-stat"><b>4.8</b><span>我的评分</span></div>
+    </div>
+
+    <div class="r-body">
+      <div class="r-head">
+        <h2>最新委托</h2>
+        <span class="r-count">共 11 条</span>
+        <span class="r-more">按最新排序 ↓</span>
+      </div>
+      <div class="r-cards">
+        <div class="r-card feature">
+          <div class="r-card-top">
+            <span class="r-idx">NO.01</span>
+            <span class="r-type">代取代买</span>
+            <span class="r-state">待接单</span>
+          </div>
+          <div class="r-card-body">
+            <h3>帮买一杯奶茶送到松园 3 号楼</h3>
+            <div class="r-card-meta"><span>松园 3 号楼</span><span>30 分钟内</span><span>押金 ¥50</span></div>
+            <div class="r-card-foot"><div class="r-money">¥8</div><div class="r-take">立即接单 →</div></div>
+          </div>
+        </div>
+
+        <div class="r-card">
+          <div class="r-card-top">
+            <span class="r-idx">NO.02</span>
+            <span class="r-type">文档制作</span>
+            <span class="r-state">待接单</span>
+          </div>
+          <div class="r-card-body">
+            <h3>课程结课 PPT 美化，20 页左右</h3>
+            <div class="r-card-meta"><span>线上交付</span><span>明天 18:00</span><span>押金 ¥60</span></div>
+            <div class="r-card-foot"><div class="r-money">¥60</div><div class="r-take">立即接单 →</div></div>
+          </div>
+        </div>
+
+        <div class="r-card">
+          <div class="r-card-top">
+            <span class="r-idx">NO.03</span>
+            <span class="r-type">学习辅导</span>
+            <span class="r-state">待接单</span>
+          </div>
+          <div class="r-card-body">
+            <h3>高数期中救命，第三章到第五章</h3>
+            <div class="r-card-meta"><span>图书馆 4 楼</span><span>后天</span><span>押金 ¥80</span></div>
+            <div class="r-card-foot"><div class="r-money">¥80</div><div class="r-take">立即接单 →</div></div>
+          </div>
+        </div>
+
+        <div class="r-card">
+          <div class="r-card-top">
+            <span class="r-idx">NO.04</span>
+            <span class="r-type">拍照拍摄</span>
+            <span class="r-state">已接单</span>
+          </div>
+          <div class="r-card-body">
+            <h3>毕业照跟拍，竹园到图书馆一路</h3>
+            <div class="r-card-meta"><span>竹园集合</span><span>本周六</span><span>押金 ¥150</span></div>
+            <div class="r-card-foot"><div class="r-money">¥150</div><div class="r-take">看详情 →</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="r-foot">
+      <span>校园委托 © 2026</span><span>报酬上限 <b>¥200</b></span><span>信誉 &lt; 60 禁止交易</span><span>禁止代写代考</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 04 JAPANESE MINIMAL ================= -->
+<section class="stage" data-view="jp" hidden>
+  <div class="stage-meta">
+    <h2>04 · Japanese Minimal 日式极简</h2>
+    <p>米白纸感、明朝体标题、1px 细线分隔；委托改排版式列表，留白即「間」，全页只用一处朱红。</p>
+    <code>paper #fafaf7 · serif 400 · line 1px #d8d5cd · 朱红 #c3272b ×1</code>
+  </div>
+  <div class="mock s-jp">
+    <nav class="j-nav">
+      <div class="j-logo">校园委托</div>
+      <div class="j-links"><b>大厅</b><span>消息</span><span>发布</span><span>订单</span><span>我的</span></div>
+    </nav>
+
+    <div class="j-hero">
+      <div class="j-hero-main">
+        <p class="j-eyebrow">CAMPUS　委托大厅　十一则在募</p>
+        <h1>今天需要帮忙<br />做点<em>什么</em>？</h1>
+        <p class="j-sub">
+          写下你要办的事、地点与时间，交给顺路的同学。<br />
+          报酬上限两百元，接单需缴押金，验收之后原路返还。
+        </p>
+        <div class="j-search">搜索委托：标题、地点、要求<span class="j-mark">SEARCH　／　⌘K</span></div>
+      </div>
+      <div class="j-seal">委<br />托</div>
+    </div>
+
+    <div class="j-stats">
+      <div class="j-stat"><b>12<small>则</small></b><span>我发布的</span></div>
+      <div class="j-stat"><b>8<small>则</small></b><span>我接取的</span></div>
+      <div class="j-stat"><b>26<small>则</small></b><span>我完成的</span></div>
+      <div class="j-stat"><b>4.8<small>分</small></b><span>我的评分</span></div>
+    </div>
+
+    <div class="j-list-head">
+      <h2>最 新 委 托</h2>
+      <div class="j-sort"><b>最新</b><span>报酬</span><span>截止</span></div>
+    </div>
+
+    <div class="j-list">
+      <div class="j-item">
+        <div class="j-no">01</div>
+        <div class="j-main">
+          <h3>帮买一杯奶茶送到松园三号楼</h3>
+          <div class="j-meta"><span>代取代买</span><span>松园三号楼</span><span>三十分钟内</span></div>
+        </div>
+        <div class="j-money">¥8</div>
+        <div class="j-state">待接单</div>
+      </div>
+      <div class="j-item">
+        <div class="j-no">02</div>
+        <div class="j-main">
+          <h3>课程结课演示文稿美化，二十页左右</h3>
+          <div class="j-meta"><span>文档制作</span><span>线上交付</span><span>明日十八时</span></div>
+        </div>
+        <div class="j-money">¥60</div>
+        <div class="j-state">待接单</div>
+      </div>
+      <div class="j-item">
+        <div class="j-no">03</div>
+        <div class="j-main">
+          <h3>高等数学期中辅导，第三章至第五章</h3>
+          <div class="j-meta"><span>学习辅导</span><span>图书馆四楼</span><span>后日</span></div>
+        </div>
+        <div class="j-money">¥80</div>
+        <div class="j-state">待接单</div>
+      </div>
+      <div class="j-item">
+        <div class="j-no">04</div>
+        <div class="j-main">
+          <h3>毕业照跟拍，自竹园至图书馆</h3>
+          <div class="j-meta"><span>拍照拍摄</span><span>竹园集合</span><span>本周六</span></div>
+        </div>
+        <div class="j-money">¥150</div>
+        <div class="j-state">已接单</div>
+      </div>
+      <div class="j-item">
+        <div class="j-no">05</div>
+        <div class="j-main">
+          <h3>打印装订一份课程报告</h3>
+          <div class="j-meta"><span>文档制作</span><span>一食堂打印店</span><span>今日二十时</span></div>
+        </div>
+        <div class="j-money">¥15</div>
+        <div class="j-state">待接单</div>
+      </div>
+    </div>
+
+    <div class="j-foot">
+      <span>校园委托　二〇二六</span>
+      <span>报酬上限　二百元</span>
+      <span>信誉六十以下　禁止交易</span>
+      <div class="j-sign">静　待　接　单</div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+    var stages = Array.prototype.slice.call(document.querySelectorAll('.stage'));
+
+    function show(key) {
+      stages.forEach(function (s) {
+        var on = s.getAttribute('data-view') === key;
+        if (on) s.removeAttribute('hidden');
+        else s.setAttribute('hidden', '');
+      });
+      tabs.forEach(function (t) {
+        t.setAttribute('aria-selected', String(t.getAttribute('data-go') === key));
+      });
+      window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+    }
+
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () { show(t.getAttribute('data-go')); });
+    });
+
+    document.addEventListener('keydown', function (e) {
+      var map = { '1': 'bento', '2': 'neu', '3': 'brut', '4': 'jp' };
+      if (map[e.key] && !e.metaKey && !e.ctrlKey) show(map[e.key]);
+    });
+  })();
+</script>
+</body>
+</html>
