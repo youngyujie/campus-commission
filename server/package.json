@@ -1,0 +1,13 @@
+{
+  "name": "campus-commission-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "校园委托后端：一个进程同时提供接口和网页，数据存 data.json",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
