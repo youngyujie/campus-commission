@@ -1,0 +1,147 @@
+{
+  "pages": [
+    {
+      "path": "pages/hall/hall",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "委托大厅",
+        "enablePullDownRefresh": true,
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "登录注册",
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/detail/detail",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "委托详情",
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/publish/publish",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "发布委托",
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/orders/orders",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "我的订单",
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/chat/chat",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "消息",
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/room/room",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "聊天",
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/mine/mine",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "我的",
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/review/review",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "评价",
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/admin/admin",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "管理后台",
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/profile/profile",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "用户主页",
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/wallet/wallet",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "我的钱包",
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/verify/verify",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "学生认证",
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/rules/rules",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "平台规则",
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/search/search",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "搜索",
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/title/title",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "我的称号",
+        "backgroundColor": "#F5F7FB"
+      }
+    },
+    {
+      "path": "pages/avatars/avatars",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "历史头像",
+        "backgroundColor": "#F5F7FB"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "校园委托",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "backgroundColor": "#F5F7FB"
+  }
+}
