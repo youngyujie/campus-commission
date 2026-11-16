@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI 协作 · Prompt 历史快照 · campus-commission</title>
+<style>
+  :root{
+    --blue:#4c6fff; --blue-d:#3a54d6; --purple:#6d5ce7;
+    --ink:#1f2937; --ink2:#4b5563; --muted:#8b95a7;
+    --line:#e6e9f0; --bg:#eef1f7; --card:#ffffff;
+    --user-bub:#4c6fff; --ai-bub:#f7f8fc;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    padding:36px 0 64px;
+  }
+  .page-head{width:900px; margin:0 auto 28px; text-align:center;}
+  .page-head h1{font-size:22px; margin:0 0 8px; letter-spacing:.5px;}
+  .page-head p{margin:0; color:var(--muted); font-size:13px;}
+
+  .chat-window{
+    width:900px; margin:0 auto 40px; background:var(--card);
+    border:1px solid var(--line); border-radius:16px; overflow:hidden;
+    box-shadow:0 18px 44px -18px rgba(31,41,55,.22), 0 4px 14px rgba(31,41,55,.06);
+  }
+  .cw-topbar{
+    height:60px; padding:0 20px; display:flex; align-items:center; justify-content:space-between;
+    background:linear-gradient(100deg,#fbfcff 0%,#f4f6ff 100%); border-bottom:1px solid var(--line);
+  }
+  .cw-title{display:flex; align-items:center; gap:10px; font-size:15px; font-weight:600;}
+  .cw-logo{
+    width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg,var(--blue),var(--purple)); color:#fff; font-size:16px;
+  }
+  .cw-title .badge{
+    font-size:11px; font-weight:600; color:var(--blue-d); background:#e8edff;
+    padding:3px 9px; border-radius:999px; margin-left:2px;
+  }
+  .cw-meta{font-size:12px; color:var(--muted);}
+
+  .cw-body{padding:26px 26px 22px; background:#fcfdff;}
+  .msg{display:flex; gap:12px; margin-bottom:22px; align-items:flex-start;}
+  .msg:last-child{margin-bottom:0;}
+  .msg.user{flex-direction:row-reverse;}
+  .avatar{
+    flex:0 0 36px; width:36px; height:36px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; color:#fff; font-size:14px; font-weight:600;
+  }
+  .av-user{background:linear-gradient(135deg,#5b6c7a,#39434d);}
+  .av-ai{background:linear-gradient(135deg,var(--blue),var(--purple)); font-size:18px;}
+  .bubble{max-width:690px;}
+  .msg-label{font-size:12px; color:var(--muted); margin:0 0 6px;}
+  .msg.user .msg-label{text-align:right;}
+  .msg-text{
+    font-size:14px; line-height:1.75; padding:13px 16px; border-radius:12px;
+    background:var(--ai-bub); border:1px solid var(--line); color:var(--ink2);
+    white-space:pre-wrap; word-break:break-word;
+  }
+  .msg.user .msg-text{
+    background:var(--user-bub); color:#fff; border-color:var(--user-bub);
+    border-top-right-radius:3px;
+  }
+  .msg.ai .msg-text{border-top-left-radius:3px;}
+  .msg-text .code{
+    display:block; background:#eef1f8; color:#33406b; border:1px solid #dfe4f2;
+    border-radius:8px; padding:10px 12px; margin:8px 0; font-family:"SF Mono",Consolas,Monaco,monospace;
+    font-size:12.5px; line-height:1.6; white-space:pre-wrap;
+  }
+  .msg.user .msg-text .code{background:rgba(255,255,255,.16); color:#fff; border-color:rgba(255,255,255,.28);}
+  .msg-text b{color:var(--ink);}
+  .msg.user .msg-text b{color:#fff;}
+  .msg-text ul{margin:6px 0; padding-left:20px;}
+  .msg-text li{margin:3px 0;}
+  .tip{
+    display:inline-block; font-size:11px; color:#0f9d7f; background:#e8faf4;
+    border:1px solid #b6ecd9; border-radius:6px; padding:2px 8px; margin-top:8px;
+  }
+  .cw-foot{
+    padding:11px 20px; border-top:1px solid var(--line); background:#fafbfe;
+    font-size:11px; color:#aab2c0; display:flex; justify-content:space-between;
+  }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>AI 协作 · Prompt 历史快照</h1>
+    <p>campus-commission 校园委托平台 · 4 个核心功能迭代 · 内容依据真实协作记录整理</p>
+  </div>
+  <div id="app"></div>
+
+<script>
+const convs = [
+  {
+    title:'统一主色（清理设计债）',
+    badge:'迭代 ①',
+    meta:'Prompt 快照 · 前端配色重构',
+    msgs:[
+      { who:'user', html:`前端改造请先读 campus-commission/前端交接文档.md，<b>严格按第 1 节的边界执行</b>：只改 pages/ 和 components/ 的模板与样式，不动 utils/store.js 等数据层。` },
+      { who:'ai', html:`已读取交接文档，定位到 §7.1「两套主色（设计债，优先处理）」。执行如下：
+<ul>
+<li>登录、学生认证、头像裁剪三处 <b>#48CBA8 → #32AD8D</b> 统一替换为 <b>#4C6FFF → #3A5BE0</b>；</li>
+<li>绿色校园插画位于 utils/art.js（边界外），<b>未改动</b>；改为新建 components/CampusBackdrop.vue，把插画重绘为蓝紫版供登录页使用。</li>
+</ul>` },
+      { who:'user', html:`mine.vue 里「成功态」的薄荷绿（#e6faf6 / #17977f）不要一起改掉。<b>mint 是语义色（成功/提示），不是品牌色</b>，不应随品牌色统一。` },
+      { who:'ai', html:`已回退 mine.vue 的薄荷绿，仅统一登录 / 认证 / 裁剪三处品牌色。约定已记录：语义色与品牌色分离。<span class="tip">✓ 已修正</span>` }
+    ]
+  },
+  {
+    title:'导航动效规范落地',
+    badge:'迭代 ②',
+    meta:'Prompt 快照 · 动效参数化',
+    msgs:[
+      { who:'user', html:`电脑端导航动效参数：
+<span class="code">动画函数：ease-out，时长 280ms；
+侧边栏展开：width 平滑过渡；
+子菜单展开：max-height 过渡 + opacity 淡入；
+悬浮下划线：transform: scaleX 0→1；
+滚动导航：background-color 和 box-shadow 渐变过渡，高度小幅过渡；
+禁止弹跳、回弹、过度放大效果，轻量化，适配 PC。
+手机端导航栏用立体椭圆和背景分离，动效参数和电脑端一致。</span>` },
+      { who:'ai', html:`已把参数抽成共享层：<b>--dur: 280ms + 统一 ease-out</b>，四套皮肤只改视觉不改节奏。
+<ul>
+<li>侧栏 width、子菜单 max-height + opacity、下划线 scaleX、吸顶栏 bg/shadow/height 全部按参数实现；</li>
+<li>手机端底部导航改为圆角胶囊，与背景分离，参数与 PC 一致。</li>
+</ul>` },
+      { who:'user', html:`手机端「粗野主义」皮肤的激活图标是黑字压黑底，看不见。改成黄底黑字，提高对比度。` },
+      { who:'ai', html:`已调整粗野主义皮肤激活态配色为 <b>黄底黑字</b>，对比度满足可读性要求。<span class="tip">✓ 已修正</span>` }
+    ]
+  },
+  {
+    title:'大厅照演示页重做 + 滚动联动',
+    badge:'迭代 ③',
+    meta:'Prompt 快照 · 大厅重构',
+    msgs:[
+      { who:'user', html:`将 ui 界面和动态效果全部实装到我的网站中，<b>格式和这个动效规范演示一样，双端都按照这个来</b>。` },
+      { who:'user', html:`追问中明确选择：<b>整个大厅照演示重做</b>，用真实数据。` },
+      { who:'user', html:`帮我做导航栏效果：<b>滚到哪个分类，指示条就平滑移到哪个标签；点击标签平滑滚到对应位置</b>。` },
+      { who:'ai', html:`已重写 hall.vue：
+<ul>
+<li>顶栏「委托大厅 + 分类链接条（scaleX 悬停下划线）+ 信誉 + 头像 + 发布」、Hero、4 张统计卡，桌面双列 / 手机卡片，数据全部走真实 store；</li>
+<li>列表按分类分成 5 个 .cat-section；</li>
+<li>新增单条滑动指示条 .topbar-ind（width + transform，300ms）；</li>
+<li>onPageScroll 驱动 updateActiveByScroll()，点击标签用 uni.pageScrollTo 平滑滚动。</li>
+</ul>` },
+      { who:'user', html:`第一版滚到底时最后两个标签点不亮 → 补「<b>到底部自动选最后一类</b>」；指示条太细看不清 → 加粗到 6rpx 并加投影。` },
+      { who:'ai', html:`已处理到底部边界判断，指示条加粗至 6rpx 并加柔和投影。<span class="tip">✓ 已修正</span>` }
+    ]
+  },
+  {
+    title:'顽固 Bug：发布页导航消失 / 卡死',
+    badge:'迭代 ④',
+    meta:'Prompt 快照 · Bug 定位与修复',
+    msgs:[
+      { who:'user', html:`我发现了 bug：下方导航栏切换到发布时，导航栏会消失，并且退出发布页面后，导航栏就卡住了不能点击。
+修复 bug，我要的效果是：
+<span class="code">点击发布的导航栏下方导航栏不会消失；
+发布页原本按钮置底不随屏幕移动，现在要和其他内容一样随用户滑动而移动；
+离开发布页导航栏也能正常使用。</span>` },
+      { who:'ai', html:`定位到两处根因：
+<ul>
+<li><b>发布页没有挂载底部导航组件</b> → 切过去导航消失；</li>
+<li>导航内有「跳转中」锁 navigating，发布页用 navigateTo 打开后旧页面残留在栈里，锁未复位 → 退出后导航锁死。</li>
+</ul>
+修复：发布页补 &lt;TabBar v-if="!isDesktop" active="publish" /&gt;；去掉固定 .actionbar，改为内容内 .submit-inline（随内容滚动）；跳转统一 uni.reLaunch 销毁旧页，并在 complete 回调复位 navigating。` },
+      { who:'user', html:`验收：跑无头浏览器断言 —— 发布页 <b>tabbar=true、actionbar=0、submit-inline 的 position=static</b>；连续切换页面后导航仍可点击。` },
+      { who:'ai', html:`验证通过：大厅 → 发布 → 大厅 → 我的，来回切换正常、0 报错；三项断言全部符合预期。<span class="tip">✓ 已验证</span>` }
+    ]
+  }
+];
+
+const app = document.getElementById('app');
+app.innerHTML = convs.map(c => `
+  <section class="chat-window">
+    <div class="cw-topbar">
+      <div class="cw-title"><span class="cw-logo">✦</span> AI 协作会话 · ${c.title}<span class="badge">${c.badge}</span></div>
+      <div class="cw-meta">${c.meta}</div>
+    </div>
+    <div class="cw-body">
+      ${c.msgs.map(m => `
+        <div class="msg ${m.who}">
+          <div class="avatar ${m.who==='user'?'av-user':'av-ai'}">${m.who==='user'?'我':'✦'}</div>
+          <div class="bubble">
+            <div class="msg-label">${m.who==='user'?'用户':'AI 助手'}</div>
+            <div class="msg-text">${m.html}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div class="cw-foot"><span>WorkBuddy · Prompt 历史快照</span><span>campus-commission</span></div>
+  </section>`).join('');
+</script>
+</body>
+</html>
