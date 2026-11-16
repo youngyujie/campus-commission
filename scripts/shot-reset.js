@@ -1,0 +1,15 @@
+const { chromium } = require('playwright-core')
+const BASE = 'https://campus-commission-35470.apps.workbuddy.host/?sharecode=L6JLE2TLA6'
+;(async () => {
+  const b = await chromium.launch({ channel: 'msedge', headless: true })
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 })
+  const p = await ctx.newPage()
+  await p.goto(BASE, { waitUntil: 'domcontentloaded' })
+  await p.waitForSelector('.m-switch-link', { timeout: 30000 })
+  await p.getByText('修改密码', { exact: true }).click()
+  await p.waitForSelector('.reset-sheet', { timeout: 10000 })
+  await p.waitForTimeout(500)
+  await p.screenshot({ path: require('path').resolve(__dirname, '../preview/upgrade/14-reset-password.png') })
+  console.log('saved')
+  await b.close()
+})().catch(e => { console.error(e); process.exit(1) })
