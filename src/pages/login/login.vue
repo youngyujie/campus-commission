@@ -40,10 +40,18 @@
               <input
                 v-model="form.password"
                 class="field-input"
-                password
-                placeholder="密码"
+                :password="loginMode === 'pwd'"
+                :type="loginMode === 'code' ? 'number' : 'text'"
+                :maxlength="loginMode === 'code' ? 6 : 30"
+                :placeholder="loginMode === 'pwd' ? '密码' : '验证码（演示 123456）'"
                 placeholder-class="ph"
               />
+            </view>
+            <view class="mode-row">
+              <text class="mode-link" @tap="toggleLoginMode">
+                {{ loginMode === 'pwd' ? '忘记密码？用验证码登录' : '← 用密码登录' }}
+              </text>
+              <text v-if="loginMode === 'code'" class="mode-fill" @tap="form.password = '123456'">填入 123456</text>
             </view>
           </template>
 
@@ -81,13 +89,15 @@
 
           <text v-if="err" class="err">{{ err }}</text>
 
-          <view class="submit" @tap="onSubmit">
-            <text class="submit-text">{{ isLogin ? '立即登录' : '立即注册' }}</text>
+          <view class="submit" :class="{ 'submit-dim': submitting }" @tap="onSubmit">
+            <text class="submit-text">{{ submitting ? '请稍候…' : (isLogin ? '立即登录' : '立即注册') }}</text>
           </view>
 
           <view class="switch-line">
             <text class="switch-hint">{{ isLogin ? '还没有账号？' : '已有账号？' }}</text>
             <text class="switch-link" @tap="toggleMode">{{ isLogin ? '去注册' : '去登录' }}</text>
+            <text v-if="isLogin" class="switch-sep">·</text>
+            <text v-if="isLogin" class="switch-link" @tap="goReset">修改密码</text>
           </view>
 
           <!-- 用户协议（登录/注册共用，按钮下方） -->
@@ -149,7 +159,21 @@
             <input v-model="form.phone" class="m-input" type="number" maxlength="11" placeholder="手机号" placeholder-class="m-ph" />
           </view>
           <view class="m-field">
-            <input v-model="form.password" class="m-input" password placeholder="密码" placeholder-class="m-ph" />
+            <input
+              v-model="form.password"
+              class="m-input"
+              :password="loginMode === 'pwd'"
+              :type="loginMode === 'code' ? 'number' : 'text'"
+              :maxlength="loginMode === 'code' ? 6 : 30"
+              :placeholder="loginMode === 'pwd' ? '密码' : '验证码（演示 123456）'"
+              placeholder-class="m-ph"
+            />
+          </view>
+          <view class="m-mode">
+            <text class="m-mode-link" @tap="toggleLoginMode">
+              {{ loginMode === 'pwd' ? '忘记密码？用验证码登录' : '← 用密码登录' }}
+            </text>
+            <text v-if="loginMode === 'code'" class="m-mode-fill" @tap="form.password = '123456'">填入 123456</text>
           </view>
         </template>
 
@@ -167,8 +191,8 @@
 
         <text v-if="err" class="m-err">{{ err }}</text>
 
-        <view class="m-submit" @tap="onSubmit">
-          <text class="m-submit-text">{{ isLogin ? '立即登录' : '立即注册' }}</text>
+        <view class="m-submit" :class="{ 'm-submit-dim': submitting }" @tap="onSubmit">
+          <text class="m-submit-text">{{ submitting ? '请稍候…' : (isLogin ? '立即登录' : '立即注册') }}</text>
         </view>
 
         <!-- 用户协议（登录/注册共用，按钮下方） -->
@@ -182,6 +206,8 @@
         <view class="m-switch">
           <text class="m-switch-hint">{{ isLogin ? '没有账号？' : '已有账号？' }}</text>
           <text class="m-switch-link" @tap="toggleMode">{{ isLogin ? '去注册' : '返回登录' }}</text>
+          <text v-if="isLogin" class="m-switch-sep">·</text>
+          <text v-if="isLogin" class="m-switch-link" @tap="goReset">修改密码</text>
         </view>
       </view>
 
@@ -212,6 +238,35 @@
         </view>
       </view>
     </view>
+    <!-- 修改密码 -->
+    <view v-if="showReset" class="reset-mask" @tap="showReset = false">
+      <view class="reset-sheet" @tap.stop>
+        <text class="reset-title">修改密码</text>
+        <text class="reset-sub">手机号 + 验证码 123456 + 新密码</text>
+        <view class="reset-field">
+          <input v-model="resetForm.phone" class="reset-input" type="number" maxlength="11" placeholder="手机号" placeholder-class="ph" />
+        </view>
+        <view class="reset-field">
+          <input v-model="resetForm.code" class="reset-input" type="number" maxlength="6" placeholder="验证码（演示 123456）" placeholder-class="ph" />
+        </view>
+        <view class="reset-field">
+          <input v-model="resetForm.password" class="reset-input" password placeholder="新密码（至少 6 位）" placeholder-class="ph" />
+        </view>
+        <view class="reset-field">
+          <input v-model="resetForm.confirm" class="reset-input" password placeholder="再输一次新密码" placeholder-class="ph" />
+        </view>
+        <text v-if="resetErr" class="reset-err">{{ resetErr }}</text>
+        <view class="reset-actions">
+          <view class="reset-btn reset-btn-ghost" @tap="showReset = false">
+            <text class="reset-btn-ghost-text">取消</text>
+          </view>
+          <view class="reset-btn reset-btn-primary" :class="{ 'reset-btn-dim': resetSubmitting }" @tap="doReset">
+            <text class="reset-btn-primary-text">{{ resetSubmitting ? '提交中…' : '确认修改' }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
     <!-- 访问口令门：服务端开启了口令时挡住 -->
     <view v-if="needKey" class="keygate">
       <view class="keygate-card">
@@ -235,7 +290,7 @@
 </template>
 
 <script>
-import { login, register, currentUser, validateCampusIdentity, localAccounts } from '../../utils/store.js'
+import { login, loginByCode, register, resetPassword, currentUser, validateCampusIdentity, localAccounts } from '../../utils/store.js'
 import CampusBackdrop from '../../components/CampusBackdrop.vue'
 import { bootstrapOnce, reconnect } from '../../utils/sync.js'
 
@@ -251,6 +306,12 @@ export default {
       keyErr: '',
       isMobile: false,
       agreed: false,
+      loginMode: 'pwd',
+      submitting: false,
+      showReset: false,
+      resetSubmitting: false,
+      resetErr: '',
+      resetForm: { phone: '', code: '123456', password: '', confirm: '' },
       localList: [],
       showLocal: false,
       form: { phone: '', password: '' },
@@ -300,6 +361,12 @@ export default {
       this.mode = this.isLogin ? 'register' : 'login'
       this.err = ''
     },
+    // 密码登录 / 验证码登录切换（演示验证码固定 123456）
+    toggleLoginMode() {
+      this.loginMode = this.loginMode === 'pwd' ? 'code' : 'pwd'
+      this.form.password = ''
+      this.err = ''
+    },
     async onSubmit() {
       if (this.isLogin) await this.doLogin()
       else await this.doRegister()
@@ -311,24 +378,89 @@ export default {
         return
       }
       if (!this.form.password) {
-        this.err = '请输入密码'
+        this.err = this.loginMode === 'code' ? '请输入验证码' : '请输入密码'
         return
       }
       if (!this.agreed) {
         uni.showToast({ title: '请先勾选同意《用户协议》', icon: 'none' })
         return
       }
-      const r = await login({ account: this.form.phone, password: this.form.password })
-      if (!r.ok) {
-        this.err = r.msg
-        this.localList = localAccounts()
-        this.showLocal = true
+      if (this.submitting) return
+      this.submitting = true
+      try {
+        // 等后端探测完成再登录：否则慢网时 isServerUp 还是 false，会误走本地模式
+        await bootstrapOnce()
+        const r =
+          this.loginMode === 'code'
+            ? await loginByCode({ phone: this.form.phone, code: this.form.password })
+            : await login({ account: this.form.phone, password: this.form.password })
+        if (!r.ok) {
+          this.err = r.msg
+          this.localList = localAccounts()
+          this.showLocal = true
+          return
+        }
+        uni.showToast({ title: '登录成功', icon: 'success' })
+        setTimeout(() => uni.reLaunch({ url: '/pages/hall/hall' }), 400)
+      } finally {
+        this.submitting = false
+      }
+    },
+    // 修改密码：手机号 + 验证码 123456 + 新密码
+    goReset() {
+      this.resetForm.phone = this.form.phone || ''
+      this.resetForm.code = '123456'
+      this.resetForm.password = ''
+      this.resetForm.confirm = ''
+      this.resetErr = ''
+      this.showReset = true
+    },
+    async doReset() {
+      if (this.resetSubmitting) return
+      const f = this.resetForm
+      if (!/^1\d{10}$/.test(String(f.phone || '').trim())) {
+        this.resetErr = '请输入 11 位手机号'
         return
       }
-      uni.showToast({ title: '登录成功', icon: 'success' })
-      setTimeout(() => uni.reLaunch({ url: '/pages/hall/hall' }), 400)
+      if (String(f.code || '') !== '123456') {
+        this.resetErr = '验证码不正确（演示码 123456）'
+        return
+      }
+      if (!f.password || String(f.password).length < 6) {
+        this.resetErr = '新密码至少 6 位'
+        return
+      }
+      if (f.password !== f.confirm) {
+        this.resetErr = '两次输入的新密码不一致'
+        return
+      }
+      this.resetSubmitting = true
+      try {
+        await bootstrapOnce()
+        const r = await resetPassword({
+          phone: String(f.phone || '').trim(),
+          code: String(f.code || ''),
+          newPassword: String(f.password || '')
+        })
+        if (!r.ok) {
+          this.resetErr = r.msg
+          return
+        }
+        this.showReset = false
+        this.mode = 'login'
+        this.loginMode = 'pwd'
+        this.form.phone = String(f.phone || '').trim()
+        this.form.password = ''
+        this.err = ''
+        uni.showToast({ title: r.msg, icon: 'none' })
+      } finally {
+        this.resetSubmitting = false
+      }
     },
     async quickLogin(d) {
+      // 和手动登录一样先等后端探测完成：否则点太快会走「本地登录」，
+      // 页面显示已登录但服务端没有会话，之后所有接口都返回 401（半登录状态）
+      await bootstrapOnce()
       const r = await login({ account: d.acc, password: d.pwd })
       if (!r.ok) {
         this.err = r.msg
@@ -353,13 +485,21 @@ export default {
         uni.showToast({ title: '请先勾选同意《用户协议》', icon: 'none' })
         return
       }
-      const r = await register(this.reg)
-      if (!r.ok) {
-        this.err = r.msg
-        return
+      if (this.submitting) return
+      this.submitting = true
+      try {
+        // 注册前也要等后端探测完成，否则账号会写进本地而不是服务端
+        await bootstrapOnce()
+        const r = await register(this.reg)
+        if (!r.ok) {
+          this.err = r.msg
+          return
+        }
+        uni.showToast({ title: r.msg, icon: 'success' })
+        setTimeout(() => uni.reLaunch({ url: '/pages/hall/hall' }), 600)
+      } finally {
+        this.submitting = false
       }
-      uni.showToast({ title: r.msg, icon: 'success' })
-      setTimeout(() => uni.reLaunch({ url: '/pages/hall/hall' }), 600)
     },
     fillLocal(u) {
       this.err = ''
@@ -655,6 +795,23 @@ export default {
   font-weight: 700;
   color: #4C6FFF;
   margin-left: 6px;
+}
+/* 密码 / 验证码登录切换 */
+.mode-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin: -2px 2px 8px;
+}
+.mode-link {
+  font-size: 12px;
+  color: #4c6fff;
+}
+.mode-fill {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ff8a3d;
 }
 .agree-row {
   display: flex;
@@ -1057,6 +1214,23 @@ export default {
   align-items: center;
   margin-top: 16px;
 }
+/* 手机端：密码 / 验证码登录切换 */
+.m-mode {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin: -4px 4px 10px;
+}
+.m-mode-link {
+  font-size: 12px;
+  color: #4c6fff;
+}
+.m-mode-fill {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ff8a3d;
+}
 .m-switch-hint {
   font-size: 13px;
   color: #8B90A3;
@@ -1110,5 +1284,110 @@ export default {
   .side {
     display: none;
   }
+}
+
+/* 密码 / 验证码切换的间隔点 */
+.switch-sep,
+.m-switch-sep {
+  font-size: 13px;
+  color: #b6bac9;
+  margin: 0 6px;
+}
+.submit-dim,
+.m-submit-dim {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* 修改密码弹层 */
+.reset-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 200;
+  background-color: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.reset-sheet {
+  width: 100%;
+  max-width: 520px;
+  background-color: #ffffff;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  padding: 22px 20px calc(22px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  animation: cc-pop 0.22s ease both;
+}
+.reset-title {
+  display: block;
+  font-size: 18px;
+  font-weight: 800;
+  color: #14161f;
+}
+.reset-sub {
+  display: block;
+  font-size: 12px;
+  color: #8b90a3;
+  margin: 6px 0 16px;
+}
+.reset-field {
+  margin-bottom: 10px;
+}
+.reset-input {
+  height: 46px;
+  background-color: #f5f7fb;
+  border-radius: 12px;
+  padding: 0 14px;
+  font-size: 14px;
+  color: #14161f;
+  box-sizing: border-box;
+}
+.reset-err {
+  display: block;
+  font-size: 12px;
+  color: #e0574f;
+  margin: 4px 2px 8px;
+}
+.reset-actions {
+  display: flex;
+  flex-direction: row;
+  margin-top: 8px;
+}
+.reset-btn {
+  flex: 1;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.reset-btn:active {
+  transform: translateY(1px) scale(0.99);
+}
+.reset-btn-ghost {
+  background-color: #f1f3fa;
+  margin-right: 12px;
+}
+.reset-btn-ghost-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: #4a4f63;
+}
+.reset-btn-primary {
+  background-image: linear-gradient(135deg, #4c6fff, #3a5be0);
+  box-shadow: 0 12px 24px -10px rgba(58, 91, 224, 0.6);
+}
+.reset-btn-primary-text {
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+}
+.reset-btn-dim {
+  opacity: 0.7;
+  pointer-events: none;
 }
 </style>
