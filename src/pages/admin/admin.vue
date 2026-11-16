@@ -121,34 +121,69 @@
         </view>
       </view>
 
-      <!-- 用户 -->
+      <!-- 用户管理：所有注册人员 -->
       <view v-if="tab === 'user'">
         <view class="search">
           <text class="search-icon">🔍</text>
-          <input v-model="userKeyword" class="search-input" placeholder="搜姓名、学号、邮箱" placeholder-class="ph" />
+          <input
+            v-model="userKeyword"
+            class="search-input"
+            placeholder="搜用户名、姓名、手机号、学号"
+            placeholder-class="ph"
+          />
         </view>
+        <view class="u-filters">
+          <view
+            v-for="f in userFilters"
+            :key="f.key"
+            class="u-filter"
+            :class="{ 'u-filter-on': userFilter === f.key }"
+            @tap="setUserFilter(f.key)"
+          >
+            <text class="u-filter-text">{{ f.label }} {{ f.count }}</text>
+          </view>
+        </view>
+        <EmptyState v-if="!userList.length" emoji="👥" title="没有匹配的账号" desc="换个关键词或筛选条件试试" />
         <view v-for="u in userList" :key="u.id" class="card user-card">
           <view class="row">
-            <Avatar :value="u.avatar" :size="56" />
+            <Avatar :value="u.avatar" :size="64" />
             <view class="col flex1">
-              <view class="row">
-                <text class="u-name">{{ u.name }}</text>
+              <view class="row u-name-row">
+                <text class="u-name">{{ u.nickname || u.name || u.username || '同学' }}</text>
+                <view v-if="u.role === 'admin'" class="pill u-role-admin">管理员</view>
                 <view v-if="u.status === 'banned'" class="pill banned">已封禁</view>
+                <view v-if="u.isMe" class="pill u-role-self">我</view>
               </view>
-              <text class="u-sub">{{ u.studentId }} · {{ u.college || '未填写院系' }}</text>
-              <text class="u-sub">{{ u.email }}</text>
+              <text class="u-sub">用户名 {{ u.username || '—' }} · ID {{ u.id }}</text>
+              <text class="u-sub">手机号 {{ u.phone || '未填写' }} · 学号 {{ u.studentId || '未填写' }}</text>
+              <text class="u-sub">{{ u.college || '未填写院系' }} · {{ joinedLabel(u) }}注册</text>
             </view>
             <view class="col u-right">
               <text class="u-credit">{{ u.credit }}</text>
               <text class="u-credit-label">信誉分</text>
             </view>
           </view>
-          <view class="row between mt-24">
-            <text class="u-stats">发布 {{ u.stats.publishedCount }} · 接单 {{ u.stats.takenCount }} · 完成 {{ u.stats.doneCount }}</text>
-            <view class="btn btn-sm" :class="u.status === 'banned' ? 'btn-soft' : 'btn-ghost'" @tap="ban(u)">
+          <view class="u-info">
+            <text class="u-info-item">押金 ¥{{ u.deposit || 0 }}</text>
+            <text class="u-info-item">发布 {{ uStat(u, 'publishedCount') }}</text>
+            <text class="u-info-item">接单 {{ uStat(u, 'takenCount') }}</text>
+            <text class="u-info-item">完成 {{ uStat(u, 'doneCount') }}</text>
+          </view>
+          <view class="u-actions">
+            <view class="btn btn-sm btn-ghost" @tap="showUser(u)">
+              <text class="btn-text-dark">查看资料</text>
+            </view>
+            <view
+              class="btn btn-sm"
+              :class="u.status === 'banned' ? 'btn-soft' : 'btn-ghost'"
+              @tap="ban(u)"
+            >
               <text :class="u.status === 'banned' ? 'btn-text-blue' : 'btn-text-dark'">
                 {{ u.status === 'banned' ? '解封' : '封禁' }}
               </text>
+            </view>
+            <view class="btn btn-sm u-manage-btn" @tap="moreActions(u)">
+              <text class="u-manage-text">管理 ▾</text>
             </view>
           </view>
         </view>
@@ -272,12 +307,14 @@ import Avatar from '../../components/Avatar.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import {
   isAdmin,
+  currentUser,
   adminStats,
   listAuditTasks,
   listApprovedTasks,
   auditTask,
-  listAllUsers,
-  toggleBanUser,
+  adminUsers,
+  adminManageUser,
+  logout,
   listAllDisputes,
   listAllTasks,
   resolveDispute,
@@ -297,7 +334,10 @@ export default {
       auditList: [],
       approvedList: [],
       userList: [],
+      userAll: [],
       userKeyword: '',
+      userFilter: 'all',
+      userFilters: [],
       disputeList: [],
       orderList: [],
       orderFilter: 'all',
@@ -322,7 +362,7 @@ export default {
   },
   watch: {
     userKeyword() {
-      this.userList = listAllUsers({ keyword: this.userKeyword })
+      this.applyUserFilter()
     },
     orderFilter() {
       this.buildOrders()
@@ -333,7 +373,7 @@ export default {
       this.stats = adminStats()
       this.auditList = listAuditTasks()
       this.approvedList = listApprovedTasks(20)
-      this.userList = listAllUsers({ keyword: this.userKeyword })
+      this.loadUsers()
       this.disputeList = listAllDisputes()
       this.categories = listCategories()
       this.announcements = listAnnouncements()
@@ -347,6 +387,151 @@ export default {
         { key: 'category', label: '分类管理', badge: 0 },
         { key: 'notice', label: '公告发布', badge: 0 }
       ]
+    },
+    // 管理员专用：共享模式读服务端全量用户，本地模式读本地全量
+    async loadUsers() {
+      const r = await adminUsers('')
+      if (!r.ok) {
+        if (r.code === 'need_login') {
+          logout()
+          uni.showToast({ title: r.msg, icon: 'none' })
+          setTimeout(() => uni.reLaunch({ url: '/pages/login/login' }), 900)
+          return
+        }
+        uni.showToast({ title: r.msg, icon: 'none' })
+        return
+      }
+      const me = currentUser()
+      this.userAll = (r.list || []).map((u) => ({ ...u, isMe: !!(me && u.id === me.id) }))
+      this.userFilters = [
+        { key: 'all', label: '全部', count: this.userAll.length },
+        { key: 'user', label: '学生', count: this.userAll.filter((u) => u.role !== 'admin').length },
+        { key: 'admin', label: '管理员', count: this.userAll.filter((u) => u.role === 'admin').length },
+        { key: 'banned', label: '已封禁', count: this.userAll.filter((u) => u.status === 'banned').length }
+      ]
+      const ti = this.tabs.findIndex((t) => t.key === 'user')
+      if (ti >= 0) this.tabs[ti].badge = this.userAll.length
+      this.applyUserFilter()
+    },
+    applyUserFilter() {
+      const k = String(this.userKeyword || '').trim().toLowerCase()
+      this.userList = this.userAll.filter((u) => {
+        if (
+          k &&
+          ![
+            u.name,
+            u.nickname,
+            u.username,
+            u.studentId,
+            u.phone,
+            u.email,
+            u.college,
+            u.id
+          ].some((v) => String(v || '').toLowerCase().includes(k))
+        ) {
+          return false
+        }
+        if (this.userFilter === 'user' && u.role === 'admin') return false
+        if (this.userFilter === 'admin' && u.role !== 'admin') return false
+        if (this.userFilter === 'banned' && u.status !== 'banned') return false
+        return true
+      })
+    },
+    setUserFilter(k) {
+      this.userFilter = k
+      this.applyUserFilter()
+    },
+    uStat(u, key) {
+      if (u[key] !== undefined && u[key] !== null) return u[key]
+      return (u.stats && u.stats[key]) || 0
+    },
+    joinedLabel(u) {
+      const t = Number(u.joinedAt) || 0
+      if (!t) return '时间未知 '
+      const d = new Date(t)
+      const pad = (n) => String(n).padStart(2, '0')
+      return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' '
+    },
+    showUser(u) {
+      const lines = [
+        '用户名：' + (u.username || '—'),
+        '昵称：' + (u.nickname || u.name || '—'),
+        '手机号：' + (u.phone || '未填写'),
+        '学号：' + (u.studentId || '未填写'),
+        '邮箱：' + (u.email || '未填写'),
+        '院系：' + (u.college || '未填写'),
+        '学生认证：' + (u.verifiedAt ? '已认证' : '未认证'),
+        '角色：' + (u.role === 'admin' ? '管理员' : '学生'),
+        '状态：' + (u.status === 'banned' ? '已封禁' : '正常'),
+        '信誉分：' + (u.credit === undefined ? 0 : u.credit),
+        '押金：¥' + (u.deposit || 0),
+        '发布 / 接单 / 完成：' + this.uStat(u, 'publishedCount') + ' / ' + this.uStat(u, 'takenCount') + ' / ' + this.uStat(u, 'doneCount'),
+        '注册时间：' + this.joinedLabel(u)
+      ]
+      uni.showModal({
+        title: (u.nickname || u.name || '账号') + ' 的资料',
+        content: lines.join('\n'),
+        showCancel: false,
+        confirmText: '关闭'
+      })
+    },
+    async manage(u, action, value) {
+      const labels = {
+        ban: '封禁账号',
+        unban: '解封账号',
+        setAdmin: '设为管理员',
+        unsetAdmin: '取消管理员',
+        resetPassword: '重置密码'
+      }
+      uni.showModal({
+        title: labels[action] || '确认操作',
+        content: `确定对「${u.nickname || u.name || u.username}」执行「${labels[action] || action}」吗？`,
+        confirmColor: action === 'ban' || action === 'unsetAdmin' ? '#F04A4A' : '#4C6FFF',
+        success: async (res) => {
+          if (!res.confirm) return
+          const r = await adminManageUser(u.id, action, value)
+          uni.showToast({ title: r.msg, icon: 'none' })
+          if (r.ok) this.loadUsers()
+        }
+      })
+    },
+    editCredit(u) {
+      uni.showModal({
+        title: '调整信誉分',
+        content: '',
+        editable: true,
+        placeholderText: '输入 0-100 的数字（低于 60 将禁止交易）',
+        success: async (res) => {
+          if (!res.confirm) return
+          const raw = String(res.content || '').trim()
+          if (!/^\d{1,3}$/.test(raw) || Number(raw) > 100) {
+            uni.showToast({ title: '请输入 0-100 的整数', icon: 'none' })
+            return
+          }
+          const r = await adminManageUser(u.id, 'setCredit', raw)
+          uni.showToast({ title: r.msg, icon: 'none' })
+          if (r.ok) this.loadUsers()
+        }
+      })
+    },
+    moreActions(u) {
+      const isAdminRole = u.role === 'admin'
+      const items = [
+        isAdminRole ? '取消管理员身份' : '设为管理员',
+        '重置密码为 123456',
+        '调整信誉分',
+        '查看完整资料'
+      ]
+      uni.showActionSheet({
+        itemList: items,
+        success: (res) => {
+          const i = res.tapIndex
+          if (i === 0) this.manage(u, isAdminRole ? 'unsetAdmin' : 'setAdmin')
+          else if (i === 1) this.manage(u, 'resetPassword')
+          else if (i === 2) this.editCredit(u)
+          else if (i === 3) this.showUser(u)
+        }
+      })
     },
     buildOrders() {
       const all = listAllTasks()
@@ -390,21 +575,7 @@ export default {
       })
     },
     ban(u) {
-      uni.showModal({
-        title: u.status === 'banned' ? '解封账号' : '封禁账号',
-        content:
-          u.status === 'banned'
-            ? `确定解封 ${u.name}（${u.studentId}）吗？`
-            : `确定封禁 ${u.name}（${u.studentId}）吗？封禁后无法发单、接单和登录。`,
-        confirmText: u.status === 'banned' ? '解封' : '封禁',
-        confirmColor: '#F04A4A',
-        success: (res) => {
-          if (!res.confirm) return
-          const r = toggleBanUser(u.id)
-          uni.showToast({ title: r.msg, icon: 'none' })
-          this.refresh()
-        }
-      })
+      this.manage(u, u.status === 'banned' ? 'unban' : 'ban')
     },
     resolve(d, action) {
       uni.showModal({
@@ -705,6 +876,75 @@ export default {
 .banned {
   background-color: #fcebeb;
   color: #f04a4a;
+}
+/* 用户管理：筛选 / 完整信息 / 操作 */
+.u-filters {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-bottom: 18rpx;
+}
+.u-filter {
+  padding: 10rpx 22rpx;
+  border-radius: 999rpx;
+  background-color: #ffffff;
+  margin: 0 12rpx 12rpx 0;
+  border: 2rpx solid #edeff6;
+}
+.u-filter-on {
+  background-color: #eef1ff;
+  border-color: #c9d5ff;
+}
+.u-filter-text {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #4a4f63;
+}
+.u-filter-on .u-filter-text {
+  color: #4c6fff;
+}
+.u-name-row {
+  align-items: center;
+  flex-wrap: wrap;
+}
+.u-role-admin {
+  background-color: #eef1ff;
+  color: #4c6fff;
+}
+.u-role-self {
+  background-color: #eef7f1;
+  color: #21a37a;
+}
+.u-info {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  background-color: #f7f9ff;
+  border-radius: 16rpx;
+  padding: 14rpx 18rpx;
+  margin-top: 20rpx;
+}
+.u-info-item {
+  font-size: 21rpx;
+  color: #4a4f63;
+  margin-right: 22rpx;
+}
+.u-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 18rpx;
+}
+.u-actions .btn {
+  margin: 0 12rpx 10rpx 0;
+}
+.u-manage-btn {
+  background-color: #4c6fff;
+}
+.u-manage-text {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #ffffff;
 }
 .reason {
   margin-top: 14rpx;
