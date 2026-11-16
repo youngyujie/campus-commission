@@ -82,10 +82,12 @@
             placeholder="输入完整的 11 位手机号"
             placeholder-class="ph"
             confirm-type="search"
+            @focus="onSearchFocus"
+            @blur="onSearchBlur"
             @confirm="doSearch"
           />
-          <view class="search-btn" @tap="doSearch">
-            <text class="search-btn-text">搜索</text>
+          <view class="search-btn" :class="{ 'search-btn-busy': searching }" @tap="doSearch">
+            <text class="search-btn-text">{{ searching ? '搜索中…' : '搜索' }}</text>
           </view>
         </view>
         <text class="search-hint">输入对方完整 11 位手机号，搜到后点卡片进入 TA 的主页，可在主页加好友 / 开始聊天（也可以搜自己的手机号）</text>
@@ -102,9 +104,12 @@
               </view>
             </view>
             <text class="ucard-sub">{{ u.college || '未填写院系' }} · 信誉 {{ u.credit }}</text>
-            <text class="ucard-phone">{{ u.isMe ? '这是你自己的手机号' : u.phoneMasked }}</text>
+            <text class="ucard-phone">{{ u.isMe ? '这是你本人的账号' : u.phoneMasked }}</text>
           </view>
-          <text class="ucard-arrow">›</text>
+          <view v-if="u.isMe" class="ucard-self">
+            <text class="ucard-self-text">自己</text>
+          </view>
+          <text v-else class="ucard-arrow">›</text>
         </view>
       </view>
 
@@ -146,7 +151,7 @@
     </view>
 
     <SideNav v-if="isDesktop" active="chat" :unread="unread" />
-    <TabBar v-else active="chat" :unread="unread" />
+    <TabBar v-else-if="!hideTab" active="chat" :unread="unread" />
   </view>
 </template>
 
@@ -168,7 +173,8 @@ import {
   respondFriend,
   requestFriend,
   searchUserByPhone,
-  latestTaskWith
+  latestTaskWith,
+  logout
 } from '../../utils/store.js'
 import { TITLES } from '../../utils/constants.js'
 import { isDesktopNow } from '../../utils/device.js'
@@ -188,7 +194,9 @@ export default {
       friends: [],
       phoneQuery: '',
       searchErr: '',
-      searchResult: []
+      searchResult: [],
+      searching: false,
+      hideTab: false
     }
   },
   onLoad() {
@@ -217,14 +225,38 @@ export default {
       this.friends = friendsOf()
     },
     async doSearch() {
-      const r = await searchUserByPhone(this.phoneQuery)
-      if (!r.ok) {
-        this.searchErr = r.msg
-        this.searchResult = []
-        return
-      }
+      if (this.searching) return
+      this.searching = true
       this.searchErr = ''
-      this.searchResult = r.list
+      try {
+        const r = await searchUserByPhone(this.phoneQuery)
+        if (!r.ok) {
+          if (r.code === 'need_login') {
+            // 服务端会话失效：清掉本地登录态，回登录页重新登录，避免卡在「半登录」
+            this.searchErr = ''
+            logout()
+            uni.showToast({ title: '登录已过期，请重新登录', icon: 'none' })
+            setTimeout(() => uni.reLaunch({ url: '/pages/login/login' }), 900)
+          } else {
+            this.searchErr = r.msg
+          }
+          this.searchResult = []
+          return
+        }
+        this.searchErr = ''
+        this.searchResult = r.list
+      } finally {
+        this.searching = false
+      }
+    },
+    // 搜索框聚焦（键盘弹出）时隐藏底部导航，避免导航栏被顶到键盘上方
+    onSearchFocus() {
+      this.hideTab = true
+    },
+    onSearchBlur() {
+      setTimeout(() => {
+        if (!this.searching) this.hideTab = false
+      }, 180)
     },
     titleColor(u) {
       const t = TITLES.find((x) => x.name === u.title)
@@ -245,6 +277,7 @@ export default {
     switchTab(t) {
       if (!this.isTap()) return
       this.tab = t
+      this.hideTab = false
       this.refresh()
     },
     accept(r) {
@@ -478,6 +511,10 @@ export default {
   align-items: center;
   justify-content: center;
 }
+.search-btn-busy {
+  opacity: 0.6;
+  pointer-events: none;
+}
 .search-btn-text {
   font-size: 26rpx;
   font-weight: 700;
@@ -612,6 +649,18 @@ export default {
   font-size: 34rpx;
   color: #c3c7d4;
   margin-left: 8rpx;
+}
+.ucard-self {
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  background-color: #eef1ff;
+  border: 2rpx solid #d5ddff;
+  margin-left: 8rpx;
+}
+.ucard-self-text {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #4c6fff;
 }
 .fr-tip {
   background-color: #eef1ff;
