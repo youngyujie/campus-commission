@@ -182,7 +182,8 @@ export default {
   computed: {
     me() {
       dataTick.value
-      return currentUser()
+      const u = currentUser()
+      return u ? { ...u } : null
     },
     avatarChar() {
       const m = this.me
@@ -198,10 +199,15 @@ export default {
       if (h < 19) return '下午好'
       return '晚上好'
     },
-    // 按分类分组
+    // 按分类分组：大厅只展示「待接单 + 未过期」的可接取订单
     sections() {
       dataTick.value
-      const all = listTasks({ building: this.building, keyword: this.keyword, sort: this.sort })
+      const all = listTasks({
+        building: this.building,
+        keyword: this.keyword,
+        sort: this.sort,
+        status: 'pending'
+      }).filter((t) => !t.expired)
       return this.categories.map((c) => {
         const tasks = all.filter((t) => t.category === c.key)
         return { key: c.key, name: c.name, emoji: c.emoji, tasks }

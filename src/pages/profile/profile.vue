@@ -163,7 +163,8 @@ import {
   setAvatarImage,
   setAvatarEmoji,
   currentTitleOf,
-  timeAgo
+  timeAgo,
+  dataTick
 } from '../../utils/store.js'
 import tapGuard from '../../utils/tapguard.js'
 
@@ -186,7 +187,9 @@ export default {
       return getUser(this.uid)
     },
     me() {
-      return currentUser()
+      dataTick.value
+      const u = currentUser()
+      return u ? { ...u } : null
     },
     isMe() {
       return !!(this.me && this.me.id === this.uid)

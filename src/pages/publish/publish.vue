@@ -1,7 +1,7 @@
 <template>
   <view class="cc-page" :class="{ 'has-side': isDesktop }">
     <SideNav v-if="isDesktop" active="publish" />
-    <AppHeader title="发布订单" />
+    <AppHeader title="发布订单" :back="false" />
 
     <view class="body">
       <view v-if="aiSeeded" class="ai-seed">
