@@ -361,7 +361,8 @@ import {
   needStudentId,
   orderMessages,
   sendOrderMessage,
-  latestTaskWith
+  latestTaskWith,
+  recordTaskView
 } from '../../utils/store.js'
 
 export default {
@@ -450,6 +451,7 @@ export default {
   },
   onLoad(options) {
     this.id = options.id || ''
+    if (this.id) recordTaskView(this.id)
     this.refresh()
     // 从卡片「立即接单」进来：直接走接单流程（押金不足会弹补交层）
     if (options && options.take === '1') {

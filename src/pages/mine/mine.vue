@@ -104,6 +104,14 @@
           </view>
         </view>
 
+        <view class="info-row" @tap="goViewed">
+          <text class="info-label">浏览记录</text>
+          <view class="row">
+            <text class="info-value">{{ viewedCount ? viewedCount + ' 条' : '暂无' }}</text>
+            <text class="info-arrow">›</text>
+          </view>
+        </view>
+
         <view class="info-row" @tap="openField('nickname')">
           <text class="info-label">昵称</text>
           <text class="info-value ellipsis">{{ me.nickname || '未填写' }}</text>
@@ -377,7 +385,9 @@ import {
   useAvatarFromHistory,
   isVerified,
   setAvatarEmoji,
-  currentTitleOf
+  currentTitleOf,
+  dataTick,
+  viewedTaskIds
 } from '../../utils/store.js'
 import { isDesktopNow } from '../../utils/device.js'
 import tapGuard from '../../utils/tapguard.js'
@@ -390,6 +400,7 @@ export default {
       statusBarHeight: 0,
       isDesktop: false,
       unread: 0,
+      viewedTick: 0,
       sheet: '',
       fillForm: { studentId: '', phone: '', code: '' },
       rechargeAmount: '',
@@ -416,23 +427,29 @@ export default {
     historyCount() {
       return avatarHistory().length
     },
+    viewedCount() {
+      this.viewedTick
+      return viewedTaskIds(this.me.id).length
+    },
     title() {
       return currentTitleOf(this.me)
     },
     me() {
-      return (
-        currentUser() || {
-          name: '',
-          nickname: '',
-          avatar: '🙂',
-          credit: 0,
-          studentId: '',
-          skills: [],
-          accepting: false,
-          college: '',
-          bio: ''
-        }
-      )
+      // 依赖 dataTick，并返回浅拷贝：否则改头像时对象引用没变，Vue 不会重渲染
+      dataTick.value
+      const u = currentUser()
+      if (u) return { ...u }
+      return {
+        name: '',
+        nickname: '',
+        avatar: '🙂',
+        credit: 0,
+        studentId: '',
+        skills: [],
+        accepting: false,
+        college: '',
+        bio: ''
+      }
     },
     adminMode() {
       return isAdminUser()
@@ -496,6 +513,8 @@ export default {
     },
     refresh() {
       this.unread = unreadCount()
+      // 从详情页返回时刷新浏览记录条数
+      this.viewedTick++
     },
     onAccepting(e) {
       toggleAccepting()
@@ -671,6 +690,10 @@ export default {
     goTitle() {
       if (!this.isTap()) return
       uni.navigateTo({ url: '/pages/title/title' })
+    },
+    goViewed() {
+      if (!this.isTap()) return
+      uni.navigateTo({ url: '/pages/history/history' })
     },
     openHistorySheet() {
       this.history = avatarHistory()
