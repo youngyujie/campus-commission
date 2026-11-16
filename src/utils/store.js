@@ -3,7 +3,7 @@
 import { ref } from 'vue'
 import { seedState } from './seed.js'
 import { readAccounts, writeAccounts } from './vault.js'
-import { call, isRemote, isServerUp, setToken } from './api.js'
+import { call, get, isRemote, isServerUp, setToken } from './api.js'
 import {
   CATEGORIES,
   STATUS,
@@ -207,7 +207,10 @@ function mergeVault() {
   accounts.forEach((acc) => {
     const i = state.users.findIndex((u) => u.id === acc.id)
     if (i >= 0) {
+      const prevRole = state.users[i].role
       state.users[i] = { ...state.users[i], ...acc }
+      // 服务端可能把用户提升为管理员，别被本地仓库里的旧 role 覆盖回去
+      if (prevRole === 'admin') state.users[i].role = 'admin'
     } else {
       state.users.push(acc)
     }
@@ -223,6 +226,8 @@ function persist() {
     if (!isServerUp()) writeAccounts(state.users)
     stateStamp = Date.now()
     uni.setStorageSync(STAMP_KEY, stateStamp)
+    // 本地一改数据就通知页面重新求值：否则「发布后返回已打开过的大厅」会看到旧列表
+    dataTick.value++
     if (!suppressPush && persistHook) persistHook()
   } catch (e) {
     console.error('存储失败', e)
@@ -478,6 +483,30 @@ export async function loginByCode({ phone, code }) {
   s.sessionUserId = u.id
   persist()
   return { ok: true, msg: '登录成功', user: u }
+}
+
+// 修改 / 重置密码（演示环境用固定验证码 123456）
+export async function resetPassword({ phone, code, newPassword }) {
+  const p = String(phone || '').trim()
+  const c = String(code || '')
+  const np = String(newPassword || '')
+  if (!/^1\d{10}$/.test(p)) return { ok: false, msg: '请输入 11 位手机号' }
+  if (c !== '123456') return { ok: false, msg: '验证码不正确（演示码 123456）' }
+  if (np.length < 6) return { ok: false, msg: '新密码至少 6 位' }
+
+  if (isServerUp()) {
+    const r = await call('/api/reset-password', { phone: p, code: c, newPassword: np })
+    return { ok: !!(r && r.ok), msg: (r && r.msg) || '修改失败' }
+  }
+
+  // 本地模式：改业务数据 + 账号仓库
+  const s = init()
+  const u = s.users.find((x) => String(x.phone || '').trim() === p)
+  if (!u) return { ok: false, msg: '本机没有这个手机号的注册记录' }
+  u.password = np
+  writeAccounts(s.users)
+  persist()
+  return { ok: true, msg: '密码已修改，请用新密码登录' }
 }
 
 // 补填学号：需要手机验证码（演示环境固定 123456）
@@ -949,6 +978,62 @@ export function listTasks(opts = {}) {
 export function getTask(id) {
   const t = init().tasks.find((x) => x.id === id)
   return t ? decorate(t) : null
+}
+
+/* ==================== 浏览记录 ==================== */
+
+const VIEWED_KEY = 'cc_viewed_tasks_v1'
+const VIEWED_MAX = 60
+
+function readViewedMap() {
+  try {
+    const raw = uni.getStorageSync(VIEWED_KEY)
+    return raw && typeof raw === 'object' ? raw : {}
+  } catch (e) {
+    return {}
+  }
+}
+
+function writeViewedMap(m) {
+  try {
+    uni.setStorageSync(VIEWED_KEY, m)
+  } catch (e) {
+    /* 忽略 */
+  }
+}
+
+// 打开委托详情时记一笔（按用户分开存，最多 60 条，最新的在前）
+export function recordTaskView(taskId) {
+  const me = currentUser()
+  const id = String(taskId || '')
+  if (!me || !id) return
+  const map = readViewedMap()
+  const list = Array.isArray(map[me.id]) ? map[me.id] : []
+  map[me.id] = [id].concat(list.filter((x) => x !== id)).slice(0, VIEWED_MAX)
+  writeViewedMap(map)
+}
+
+export function viewedTaskIds(userId) {
+  const uid = userId || (currentUser() || {}).id
+  if (!uid) return []
+  const map = readViewedMap()
+  return Array.isArray(map[uid]) ? map[uid].slice() : []
+}
+
+export function viewedTasks(userId) {
+  const s = init()
+  return viewedTaskIds(userId)
+    .map((id) => s.tasks.find((x) => x.id === id))
+    .filter(Boolean)
+    .map(decorate)
+}
+
+export function clearViewedTasks() {
+  const me = currentUser()
+  if (!me) return
+  const map = readViewedMap()
+  delete map[me.id]
+  writeViewedMap(map)
 }
 
 export function checkBanned(text) {
@@ -1600,18 +1685,96 @@ export function disputesOfUser(userId) {
 
 export function listAllUsers({ keyword, status } = {}) {
   const s = init()
-  let arr = s.users.filter((u) => u.role !== 'admin')
+  // 管理员也要出现在列表里，方便查看和管理全部注册人员
+  let arr = s.users.slice()
   if (status && status !== 'all') arr = arr.filter((u) => u.status === status)
   if (keyword) {
     const k = String(keyword).trim().toLowerCase()
-    arr = arr.filter(
-      (u) =>
-        u.name.toLowerCase().includes(k) ||
-        u.studentId.includes(k) ||
-        (u.email || '').toLowerCase().includes(k)
+    arr = arr.filter((u) =>
+      [u.name, u.nickname, u.username, u.studentId, u.phone, u.email, u.college].some((v) =>
+        String(v || '').toLowerCase().includes(k)
+      )
     )
   }
   return arr.map((u) => ({ ...u, stats: myStats(u.id) }))
+}
+
+// 管理员：所有注册人员。共享模式走服务端权威数据（含手机号/学号/角色），
+// 本地模式用本地全量用户。
+export async function adminUsers(keyword = '') {
+  let list
+  if (isServerUp()) {
+    // 冷启动时首个接口可能较慢：给足超时并重试一次，别让列表空着
+    let r = await get('/api/admin/users', 20000)
+    if (!r || r.__needKey || (!r.ok && !r.__needLogin)) {
+      await new Promise((resolve) => setTimeout(resolve, 800))
+      r = await get('/api/admin/users', 20000)
+    }
+    if (r && r.__needLogin) {
+      return { ok: false, code: 'need_login', msg: '登录状态已失效，请重新登录', list: [] }
+    }
+    if (!r || r.__needKey || !r.ok) {
+      return { ok: false, msg: (r && r.msg) || '读取用户列表失败', list: [] }
+    }
+    list = r.list || []
+  } else {
+    list = listAllUsers({ keyword: '' })
+  }
+  const k = String(keyword || '').trim().toLowerCase()
+  if (k) {
+    list = list.filter((u) =>
+      [u.name, u.nickname, u.username, u.studentId, u.phone, u.email, u.college, u.id].some((v) =>
+        String(v || '').toLowerCase().includes(k)
+      )
+    )
+  }
+  return { ok: true, list }
+}
+
+function localManageUser(id, action, value) {
+  const s = init()
+  const u = s.users.find((x) => x.id === id)
+  if (!u) return { ok: false, msg: '用户不存在' }
+  const me = currentUser()
+  const isSelf = !!(me && u.id === me.id)
+  let msg = ''
+  if (action === 'ban' || action === 'unban') {
+    if (isSelf) return { ok: false, msg: '不能封禁自己' }
+    u.status = action === 'ban' ? 'banned' : 'active'
+    msg = action === 'ban' ? '已封禁' : '已解封'
+  } else if (action === 'setAdmin') {
+    u.role = 'admin'
+    msg = '已设为管理员'
+  } else if (action === 'unsetAdmin') {
+    if (isSelf) return { ok: false, msg: '不能取消自己的管理员身份' }
+    u.role = 'user'
+    msg = '已取消管理员'
+  } else if (action === 'resetPassword') {
+    u.password = '123456'
+    msg = '密码已重置为 123456'
+  } else if (action === 'setCredit') {
+    const raw = String(value === undefined || value === null ? '' : value).trim()
+    if (!/^\d{1,3}$/.test(raw) || Number(raw) > 100) {
+      return { ok: false, msg: '信誉分需为 0-100 的整数' }
+    }
+    u.credit = Number(raw)
+    msg = '信誉分已更新为 ' + u.credit
+  } else {
+    return { ok: false, msg: '未知操作' }
+  }
+  notify(u.id, { type: 'system', title: '账号管理通知', body: msg })
+  persist()
+  return { ok: true, msg }
+}
+
+// 管理员：管理某个账号（封禁/解封、设/撤管理员、重置密码、调整信誉分）
+export async function adminManageUser(id, action, value) {
+  if (isServerUp()) {
+    const r = await call('/api/admin/user', { id, action, value })
+    if (!r || !r.ok) return { ok: false, msg: (r && r.msg) || '操作失败' }
+    return { ok: true, msg: r.msg }
+  }
+  return localManageUser(id, action, value)
 }
 
 export function toggleBanUser(userId) {
@@ -1882,6 +2045,56 @@ export function maskPhone(phone) {
   return p.slice(0, 3) + '****' + p.slice(7)
 }
 
+// 本机可见的用户：业务数据 + 账号仓库合并。
+// 共享模式下 users 是脱敏的（别人没有手机号），账号仓库用来把手机号等字段补回来。
+function mergedLocalUsers() {
+  const s = init()
+  const merged = new Map()
+  s.users.forEach((u) => {
+    if (u && u.id) merged.set(u.id, Object.assign({}, u))
+  })
+  readAccounts().forEach((a) => {
+    if (!a || !a.id) return
+    const cur = merged.get(a.id)
+    if (!cur) {
+      merged.set(a.id, Object.assign({}, a))
+      return
+    }
+    const fill = ['phone', 'nickname', 'name', 'avatar', 'college', 'credit', 'role', 'status']
+    fill.forEach((k) => {
+      if ((cur[k] === undefined || cur[k] === '' || cur[k] === null) && a[k] !== undefined) cur[k] = a[k]
+    })
+  })
+  const self = currentUser()
+  if (self) {
+    const cur = merged.get(self.id)
+    if (cur) Object.assign(cur, self)
+    else merged.set(self.id, Object.assign({}, self))
+  }
+  return [...merged.values()]
+}
+
+function localUserCards(phone, me) {
+  return mergedLocalUsers()
+    // 允许搜到自己（含管理员账号），只排除被封禁的
+    .filter((u) => String(u.phone || '').trim() === phone && u.status !== 'banned')
+    .map((u) => {
+      const t = currentTitleOf(u)
+      return {
+        id: u.id,
+        nickname: u.nickname || u.name || '同学',
+        avatar: u.avatar || '🙂',
+        college: u.college || '',
+        credit: u.credit,
+        phoneMasked: maskPhone(String(u.phone || '')),
+        title: t.name,
+        titleEmoji: t.emoji,
+        isMe: u.id === me.id,
+        relation: u.id === me.id ? 'self' : friendState(me.id, u.id).status
+      }
+    })
+}
+
 // 按手机号精确搜索同学 —— 必须输入完整 11 位，避免用前缀批量枚举
 export async function searchUserByPhone(phone) {
   const me = currentUser()
@@ -1890,11 +2103,24 @@ export async function searchUserByPhone(phone) {
   if (!p) return { ok: false, msg: '请输入手机号', list: [] }
   if (!/^1\d{10}$/.test(p)) return { ok: false, msg: '请输入完整的 11 位手机号', list: [] }
 
-  // 共享模式：手机号不下发到客户端，只能由服务端精确匹配
+  // 共享模式：手机号不下发到客户端，优先由服务端精确匹配
   if (isServerUp()) {
-    const r = await call('/api/find-user', { phone: p })
+    // 搜索要快：6 秒超时、不重试，失败就让用户立刻看到提示
+    const r = await call('/api/find-user', { phone: p }, 6000, false)
     if (!r || !r.ok) {
-      return { ok: false, msg: (r && r.msg) || '没有找到这个手机号对应的同学', list: [] }
+      if (r && r.code === 'need_login') {
+        return { ok: false, code: 'need_login', msg: r.msg || '请先登录', list: [] }
+      }
+      // 服务端没有这个账号时，再用本机账号仓库兜底：
+      // 早先在本机（纯本地模式）注册过的账号不该被误判成「未注册」。
+      const local = localUserCards(p, me)
+      if (local.length) return { ok: true, msg: '', list: local }
+      return {
+        ok: false,
+        code: (r && r.code) || '',
+        msg: (r && r.msg) || '没有找到这个手机号对应的同学',
+        list: []
+      }
     }
     return {
       ok: true,
@@ -1912,30 +2138,9 @@ export async function searchUserByPhone(phone) {
     }
   }
 
-  const s = init()
-  // 允许搜到自己：自己的手机号也要能搜出卡片（只是主页不显示加好友/聊天按钮）
-  const hits = s.users.filter((u) => u.phone === p && u.role !== 'admin' && u.status !== 'banned')
-  if (!hits.length) return { ok: false, msg: '没有找到这个手机号对应的同学', list: [] }
-
-  return {
-    ok: true,
-    msg: '',
-    list: hits.map((u) => {
-      const t = currentTitleOf(u)
-      return {
-        id: u.id,
-        nickname: u.nickname || u.name || '同学',
-        avatar: u.avatar || '🙂',
-        college: u.college || '',
-        credit: u.credit,
-        phoneMasked: maskPhone(u.phone),
-        title: t.name,
-        titleEmoji: t.emoji,
-        isMe: u.id === me.id,
-        relation: u.id === me.id ? 'self' : friendState(me.id, u.id).status
-      }
-    })
-  }
+  const list = localUserCards(p, me)
+  if (!list.length) return { ok: false, msg: '没有找到这个手机号对应的同学', list: [] }
+  return { ok: true, msg: '', list }
 }
 
 export function requestFriend(toId) {
