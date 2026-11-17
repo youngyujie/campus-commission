@@ -100,7 +100,7 @@
   <div class="top">
     <div>
       <h1>《校园委托》演示视频 · 手机端逐字口播稿</h1>
-      <p>7 分 30 秒 · 1080p · 全程手机端演示 · 每段台词可直接朗读</p>
+      <p>7 分 30 秒 · 1080p · 完整功能闭环版 · 全程手机端演示</p>
     </div>
     <button class="btn-copy" onclick="copyAll()">复制全文台词</button>
   </div>
@@ -109,56 +109,70 @@
     <span>总时长 7:30</span>
     <span>纯手机端功能演示</span>
     <span>AI 协同段 ≥2 分钟</span>
-    <span>语速建议 220 字/分钟</span>
+    <span>覆盖发单→接单→押金→交付→验收→互评→管理</span>
   </div>
 
   <div class="tipbar">
-    <b>录制方式：</b>手机竖屏录屏（1080p），功能演示全程在手机浏览器里操作。<b>AI 协同段</b>切到手机上的 AI 对话窗口现场输入 Prompt；<b>架构与复现段</b>用口播配静态图或预先录好的画面，不需要电脑操作。
+    <b>本版改动：</b>功能演示从「只看大厅和发布」扩展为<b>完整业务闭环</b>——新增接单押金、开始处理、提交交付、验收返还、双方互评、消息通知、钱包流水、管理后台审核。每段台词按 220 字/分钟配节奏，可照读。<b>AI 协同段仍保留 2 分钟</b>（评分硬性要求），必须你本人现场录。
   </div>
 
   <!-- 1 -->
   <div class="seg">
-    <div class="seg-head"><span class="time">00:00–00:25</span><span class="seg-title">开场</span></div>
+    <div class="seg-head"><span class="time">00:00–00:20</span><span class="seg-title">开场</span></div>
     <div class="op"><b>画面：</b>手机浏览器打开项目首页 / 委托大厅，静止 2 秒后开始讲。</div>
-    <div class="say" data-say><span class="lead">口播：</span>大家好，我是×××。今天演示的作品叫《校园委托》——一个面向在校学生的小额互助平台：发一条委托，写明报酬和截止，其他同学自由接单，平台用押金和信誉分保障双方。整段演示我都在手机上完成，因为它本来就是给学生随时随地用的。它从零到上线，全程由我和 AI 协作，后面我会专门用两分钟展示这个过程。</div>
+    <div class="say" data-say><span class="lead">口播：</span>大家好。今天演示的作品叫《校园委托》——面向本校学生的小额互助平台：发一条委托，同学自由接单，押金保障、信用沉淀。我会完整走一遍发单、接单、押金、交付、验收、互评的全流程，后面还有两分钟展示我怎么和 AI 一起做出来。</div>
   </div>
 
   <!-- 2 -->
   <div class="seg">
-    <div class="seg-head"><span class="time">00:25–00:55</span><span class="seg-title">手机端登录与账号</span></div>
-    <div class="op"><b>操作：</b>手机浏览器打开链接 → 登录页演示「密码 / 验证码」切换 → 点演示账号「🐰 林小满」进入。</div>
-    <div class="say" data-say><span class="lead">口播：</span>先看登录页。手机上支持两种登录方式：手机号加密码，或者切换成验证码，忘记密码也能在这里自助修改。为了节省时间，我直接点演示账号「林小满」进来。注意这条规则：只有完成学生认证、填上学号，才能发单和接单——这是平台防止虚假交易的第一道门槛。</div>
+    <div class="seg-head"><span class="time">00:20–00:45</span><span class="seg-title">登录与学生认证</span></div>
+    <div class="op"><b>操作：</b>打开链接 → 登录页点演示账号「🐰 林小满」进入 → 顺带展示「我的」里的学生认证状态。</div>
+    <div class="say" data-say><span class="lead">口播：</span>先看登录。支持手机号加密码，也能切换验证码登录。我直接点演示账号林小满进来。关键规则：完成学生认证、填上学号，才能发单接单——这是防虚假交易的第一道门槛，认证信息提交后锁定。</div>
   </div>
 
   <!-- 3 -->
   <div class="seg">
-    <div class="seg-head"><span class="time">00:55–01:55</span><span class="seg-title">手机端大厅 · 分区卡片 + 胶囊导航（重点）</span></div>
-    <div class="op"><b>操作：</b><ol><li>上下滑动大厅 → 看分类分区卡片、委托卡点按上浮；</li><li>点底部不同标签 → 浅薄荷绿椭圆胶囊平滑滑过来；</li><li>点「发布」标签 → 确认底部导航不消失；</li><li>滑到底部 → 看分区顺序与卡片间距。</li></ol></div>
-    <div class="say" data-say><span class="lead">口播：</span>进来是委托大厅，这是手机端的样子。列表按分类分成几个区，每个区一叠委托卡，卡片之间留了空隙，滑起来层次很清楚；点按卡片会有轻微上浮的反馈。重点看底部这条导航——它是悬浮的椭圆胶囊，和背景分离；我切到不同标签，这个浅薄荷绿的椭圆就会平滑滑过去，选中项也跟着变色。手机端没有顶部那些分类标签，因为屏幕窄，用分区卡片更顺手。列表只显示待接单、没过期的委托，数据全部来自真实状态层。</div>
+    <div class="seg-head"><span class="time">00:45–01:25</span><span class="seg-title">大厅浏览 + 搜索 + 胶囊导航</span></div>
+    <div class="op"><b>操作：</b>上下滑大厅 → 看分类分区卡片、卡片点按上浮 → 点顶部搜索入口 → 切底部标签看薄荷绿胶囊滑动。</div>
+    <div class="say" data-say><span class="lead">口播：</span>进来是委托大厅。列表按五类分区：代取代买、文档制作、学习辅导、拍照拍摄、其他；每张贴卡显示报酬、地点和截止时间。顶部有搜索，带热门词和历史。重点看底部悬浮胶囊——切标签时薄荷绿椭圆平滑滑过去。大厅只显示待接单、未过期的委托，数据全部来自真实状态层。上面四项统计是我发布的、我接取的、我完成的和我的评分。</div>
   </div>
 
   <!-- 4 -->
   <div class="seg">
-    <div class="seg-head"><span class="time">01:55–02:35</span><span class="seg-title">手机端发布委托</span></div>
-    <div class="op"><b>操作：</b>点底部「✏️ 发布」→ 选类型 → 填标题/地点/报酬/截止 → 注意按钮随内容滚动 → 提交。</div>
-    <div class="say" data-say><span class="lead">口播：</span>接下来发一条委托。点底部这个「发布」标签，页面顶部没有返回按钮，全靠底部导航切换，这样手机上更简洁。填标题、地点、报酬和截止时间——注意这个发布按钮是跟着内容一起滚动的，不会固定在底部挡住键盘。这里有几道硬约束：报酬上限 200 元；接单方要交 50 到 200 元押金，且不低于报酬；含有「代考」「代写」这类违规词会被当场拦下。提交后委托立即上架。</div>
+    <div class="seg-head"><span class="time">01:25–02:05</span><span class="seg-title">订单详情 + 留言交流 + 押金接单</span></div>
+    <div class="op"><b>操作：</b>点开一条待接单委托 → 看详情与留言区 → 发一条留言 → 点「接单」→ 展示押金弹层（余额不足则补交）→ 确认接单。</div>
+    <div class="say" data-say><span class="lead">口播：</span>点开一条委托。详情页有报酬、地点、截止时间和委托人信誉分，代取类还显示商品价格和凭证。下面有公开交流区，接单前可以先留言问细节。确认要做就点接单——这里弹出押金规则：押金五十到二百元，且不低于报酬，余额不够要先补交。押金是双方保障，完成会全额返还。接单后，委托进入进行中。</div>
   </div>
 
   <!-- 5 -->
   <div class="seg">
-    <div class="seg-head"><span class="time">02:35–03:15</span><span class="seg-title">订单流转 + 个人中心</span></div>
-    <div class="op"><b>操作：</b>进「我的订单」看状态流转 → 切「我的」看立体卡片、按钮按下反馈、浏览记录入口。</div>
-    <div class="say" data-say><span class="lead">口播：</span>发布后来到「我的订单」。一条委托会经历待接单、已接单、待验收，到最后已完成，每一步都有记录；完成后押金原路返还，违约申诉成立会按冻结金额扣罚。切到「我的」，卡片是分层的立体投影，按钮按下有细微的下压反馈——这些都是刻意的轻量化处理，不抢内容。这里还新增了浏览记录入口，点进去能看到我最近看过的委托。</div>
+    <div class="seg-head"><span class="time">02:05–02:40</span><span class="seg-title">开始处理 → 提交交付 → 验收 → 互评</span></div>
+    <div class="op"><b>操作：</b>切到另一个演示账号看接到的单 → 点「开始处理」→「提交交付」（选文件或填说明）→ 切回委托人账号「验收并确认完成」→ 看押金返还与信誉变化 → 双方互评（星级+标签+留言）。</div>
+    <div class="say" data-say><span class="lead">口播：</span>接单后点开始处理，做完提交交付成果，可以传文件也可以填说明。切回委托人这边验收，点确认完成，押金立刻原路返还，双方信誉各加两分。最后双方互评，打星级、选印象标签、留文字。到这里，一条委托从发布到评价就完整闭环了。中途有纠纷还能发起申诉，由管理员仲裁。</div>
   </div>
 
   <!-- 6 -->
   <div class="seg">
-    <div class="seg-head"><span class="time">03:15–03:50</span><span class="seg-title">手机端好友搜索</span></div>
-    <div class="op"><b>操作：</b>进消息 → 点搜索 → 注意键盘弹出时底部导航自动隐藏 → 搜自己（卡片标「自己」）→ 搜另一个演示账号 → 点进主页看按钮差异。</div>
-    <div class="say" data-say><span class="lead">口播：</span>再看好友功能。我点搜索框，注意底部导航会自动隐藏，不会顶在键盘上面挡视线。我输自己的手机号搜一下——结果卡片右边标着「自己」，点进去也不会出现「加好友」和「聊天」按钮。再搜另一个已注册的演示账号，就能正常添加好友、开始聊天。这个搜索是服务端和本机账号仓库合并查的，所以自己和管理员都能搜到。</div>
+    <div class="seg-head"><span class="time">02:40–03:05</span><span class="seg-title">消息通知 + 好友社交</span></div>
+    <div class="op"><b>操作：</b>进「消息」tab → 看私聊列表和系统通知 → 打开一个私聊 → 演示好友搜索（搜自己标「自己」、搜他人显示加好友/聊天按钮）。</div>
+    <div class="say" data-say><span class="lead">口播：</span>消息页分两部分。一是私聊，支持文字、图片和快捷回复；非好友只能临时聊十句，想继续要先加好友。二是系统通知，接单、待验收、收到评价、好友申请、纠纷处理都会推送到这里。好友功能按手机号搜同学，搜自己标「自己」，搜别人能加好友、开始聊天。</div>
   </div>
 
-  <!-- 7 AI -->
+  <!-- 7 -->
+  <div class="seg">
+    <div class="seg-head"><span class="time">03:05–03:35</span><span class="seg-title">发布委托 + 我的钱包</span></div>
+    <div class="op"><b>操作：</b>点底部「✏️ 发布」→ 填标题/类型/报酬/截止 → 展示违规词拦截与报酬上限 → 提交 → 进「我的」→ 看我的订单六个 tab 与钱包流水。</div>
+    <div class="say" data-say><span class="lead">口播：</span>再看发布。点底部发布，填标题、类型、报酬和截止时间，按钮跟着内容滚动，不挡键盘。几道硬约束：报酬上限两百元，押金不低于报酬，含「代考」「代写」违规词会被当场拦下。提交后立即上架。进「我的」，订单分六类：我发布的、我接的、收藏、收到的评价、作品和申诉。钱包记录累计收入、支出和每笔流水，平台只记账，线下面试结算。</div>
+  </div>
+
+  <!-- 8 -->
+  <div class="seg">
+    <div class="seg-head"><span class="time">03:35–03:50</span><span class="seg-title">管理员后台</span></div>
+    <div class="op"><b>操作：</b>用张老师账号进「我的 → 管理后台」→ 看数据概览 → 委托审核（通过/驳回）→ 用户管理 → 申诉处理。</div>
+    <div class="say" data-say><span class="lead">口播：</span>最后是管理员后台。张老师登录后看到数据概览：注册数、订单数、待审核、成交额和热门分类。委托要审核才能上架，也能抽查下架；用户管理能查看信用押金、封禁违规账号；申诉在这里仲裁，判定违约会扣分并扣罚押金。</div>
+  </div>
+
+  <!-- 9 AI -->
   <div class="seg">
     <div class="seg-head"><span class="time">03:50–05:50</span><span class="seg-title"><span class="star">★</span> AI 协同过程复现（评分关键 · 2 分钟）</span></div>
 
@@ -188,33 +202,34 @@
     <div class="note"><b>圈给观众看：</b><code>&lt;TabBar&gt;</code> 挂载、<code>.submit-inline</code>、<code>uni.reLaunch</code>、<code>navigating</code> 复位。</div>
   </div>
 
-  <!-- 8 -->
+  <!-- 10 -->
   <div class="seg">
-    <div class="seg-head"><span class="time">05:50–06:40</span><span class="seg-title">技术架构速讲（口播 + 静态图）</span></div>
+    <div class="seg-head"><span class="time">05:50–06:30</span><span class="seg-title">技术架构速讲（口播 + 静态图）</span></div>
     <div class="op"><b>画面：</b>预先做好的架构图或代码截图，静止展示，不需要现场操作。</div>
     <div class="say" data-say><span class="lead">口播：</span>快速过一下架构。前端是 uni-app 加 Vue3，用 Vite 构建，可以打包成一个单文件 HTML，双击打开、离线可用；数据层是 store，负责所有业务状态和规则校验；同步层做跨浏览器数据互通；后端是轻量的 Node 服务，用 HMAC 签名的无状态令牌。我给 AI 的边界始终一致：只改页面和组件，数据层由我把关，设计令牌统一——这样 AI 改得再快，也不会把架构改散。</div>
   </div>
 
-  <!-- 9 -->
+  <!-- 11 -->
   <div class="seg">
-    <div class="seg-head"><span class="time">06:40–07:20</span><span class="seg-title">10 分钟极速复现（口播 + 静态图）</span></div>
+    <div class="seg-head"><span class="time">06:30–07:10</span><span class="seg-title">10 分钟极速复现（口播 + 静态图）</span></div>
     <div class="op"><b>画面：</b>预先录好的终端操作片段或 README 截图，静止/播放均可。</div>
     <div class="say" data-say><span class="lead">口播：</span>最后是复现。仓库是公开的，克隆下来，执行 npm install 和 npm run dev:h5，打开本地地址就能跑；或者执行构建命令生成一个单文件 HTML，双击即用、离线可跑。README 里有十分钟极速复现的完整步骤，环境配置和依赖都写清楚了。</div>
   </div>
 
-  <!-- 10 -->
+  <!-- 12 -->
   <div class="seg">
-    <div class="seg-head"><span class="time">07:20–07:30</span><span class="seg-title">收尾</span></div>
+    <div class="seg-head"><span class="time">07:10–07:30</span><span class="seg-title">收尾</span></div>
     <div class="op"><b>画面：</b>回到手机端大厅首页，静止 2 秒。</div>
-    <div class="say" data-say><span class="lead">口播：</span>人定方向与边界，AI 负责落地；过程可追溯，结果可复现。以上就是《校园委托》手机端的全部演示，感谢观看。</div>
+    <div class="say" data-say><span class="lead">口播：</span>人定方向与边界，AI 负责落地；过程可追溯，结果可复现。以上就是《校园委托》的完整演示，感谢观看。</div>
   </div>
 
   <div class="chk">
-    <h3>录制前检查清单（手机端）</h3>
+    <h3>录制前检查清单（手机端 · 完整闭环版）</h3>
     <label>☐ 手机录屏 1080p、竖屏、帧率 ≥30fps，导出 MP4</label>
-    <label>☐ 手机浏览器能打开线上链接；演示账号已登录、数据正常</label>
+    <label>☐ 准备两个演示账号（委托人 + 接单人），用于演示交付与互评</label>
+    <label>☐ 大厅有充足待接单订单（已在线上刷新为 11 条）</label>
+    <label>☐ 手机浏览器能打开线上链接；演示账号已登录</label>
     <label>☐ 手机电量充足、通知已关闭，避免录制中弹窗打断</label>
-    <label>☐ 麦克风环境安静；系统音与讲解同录</label>
     <label>☐ 手机上已登录 AI 对话工具（用于 4.1 / 4.2 段现场输入 Prompt）</label>
     <label>☐ 架构图 / README 截图预先准备好（05:50 之后两段用）</label>
     <label>☐ AI 协同段实际时长 ≥2 分钟；成片总长 5–8 分钟</label>
