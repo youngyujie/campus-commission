@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>演示视频 · 逐字口播稿 · 校园委托</title>
+<style>
+  :root{
+    --blue:#4c6fff; --purple:#6d5ce7; --mint:#0f9d7f;
+    --ink:#1f2937; --ink2:#41506a; --muted:#8490a4;
+    --line:#e6e9f0; --bg:#eef1f7; --card:#fff;
+    --op:#fff8e6; --op-line:#f3d98a; --say:#f4f7ff; --say-line:#d6deff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    padding:28px 16px 60px; line-height:1.7;
+  }
+  .wrap{max-width:920px; margin:0 auto;}
+  .top{
+    background:linear-gradient(120deg,#4c6fff,#6d5ce7); color:#fff;
+    border-radius:16px; padding:22px 26px; margin-bottom:18px;
+    box-shadow:0 16px 34px -16px rgba(76,111,255,.6);
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+  }
+  .top h1{margin:0 0 4px; font-size:22px;}
+  .top p{margin:0; opacity:.9; font-size:13px;}
+  .btn-copy{
+    flex:0 0 auto; border:1px solid rgba(255,255,255,.55); background:rgba(255,255,255,.15);
+    color:#fff; padding:8px 14px; border-radius:9px; font-size:13px; cursor:pointer;
+  }
+  .btn-copy:hover{background:rgba(255,255,255,.28);}
+  .meta{
+    display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;
+  }
+  .meta span{
+    background:#fff; border:1px solid var(--line); border-radius:999px;
+    padding:5px 13px; font-size:12px; color:var(--ink2);
+  }
+  .seg{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:18px 22px; margin-bottom:16px;
+    box-shadow:0 6px 18px -10px rgba(31,41,55,.2);
+  }
+  .seg-head{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+  .time{
+    font-variant-numeric:tabular-nums; font-weight:700; font-size:13px; color:#fff;
+    background:var(--blue); padding:4px 11px; border-radius:8px; white-space:nowrap;
+  }
+  .seg-title{font-size:17px; font-weight:700;}
+  .star{color:#e0721b; font-size:13px; font-weight:700;}
+  .op{
+    background:var(--op); border:1px solid var(--op-line); border-radius:10px;
+    padding:11px 14px; margin-bottom:12px; font-size:14px; color:#6b5313;
+  }
+  .op b{color:#8a6500;}
+  .op ol{margin:6px 0 0; padding-left:22px;}
+  .op li{margin:3px 0;}
+  .say{
+    background:var(--say); border:1px solid var(--say-line); border-radius:10px;
+    padding:13px 16px; font-size:17px; color:var(--ink); line-height:1.9;
+  }
+  .say .lead{font-weight:700; color:var(--blue-d); margin-right:6px;}
+  .say small{display:block; font-size:12px; color:var(--muted); margin-top:6px; line-height:1.6;}
+  .prompt{
+    background:#1e2433; color:#e6ecff; border-radius:10px; padding:14px 16px;
+    font-family:"SF Mono",Consolas,Monaco,monospace; font-size:13px; line-height:1.7;
+    white-space:pre-wrap; margin:10px 0; position:relative;
+  }
+  .prompt .cp{
+    position:absolute; top:8px; right:8px; background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.25); color:#fff; border-radius:6px;
+    font-size:11px; padding:3px 8px; cursor:pointer;
+  }
+  .note{
+    font-size:13px; color:var(--ink2); background:#eefaf5; border:1px solid #b9e8d5;
+    border-radius:9px; padding:10px 13px; margin-top:10px;
+  }
+  .note b{color:var(--mint);}
+  .chk{
+    background:#fff; border:1px dashed #c3cad8; border-radius:12px; padding:16px 20px;
+    font-size:14px; color:var(--ink2);
+  }
+  .chk h3{margin:0 0 8px; font-size:16px; color:var(--ink);}
+  .chk label{display:block; margin:5px 0;}
+  @media print{
+    body{background:#fff; padding:0;}
+    .top{box-shadow:none; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    .seg,.op,.say,.prompt,.note,.chk{break-inside:avoid; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    .btn-copy,.prompt .cp{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="script">
+
+  <div class="top">
+    <div>
+      <h1>《校园委托》演示视频 · 逐字口播稿</h1>
+      <p>7 分 30 秒 · 1080p · 每段台词可直接照读 · AI 协同段 ≥2 分钟</p>
+    </div>
+    <button class="btn-copy" onclick="copyAll()">复制全文台词</button>
+  </div>
+
+  <div class="meta">
+    <span>总时长 7:30</span>
+    <span>语速建议 220 字/分钟</span>
+    <span>麦克风 + 系统音同录</span>
+    <span>提词：放大本页或打印</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="seg">
+    <div class="seg-head"><span class="time">00:00–00:25</span><span class="seg-title">开场</span></div>
+    <div class="op"><b>画面：</b>标题页或项目首页，无操作。</div>
+    <div class="say" data-say><span class="lead">口播：</span>大家好，我是×××。今天演示的作品叫《校园委托》——一个面向在校学生的小额互助平台：发一条委托，写明报酬和截止，其他同学自由接单，平台用押金和信誉分保障双方。它从零到上线，全程由我和 AI 协作完成。接下来的视频，我会先演示产品怎么用，再重点展示我是怎么和 AI 一起把它做出来的。</div>
+  </div>
+
+  <!-- 2 -->
+  <div class="seg">
+    <div class="seg-head"><span class="time">00:25–00:55</span><span class="seg-title">登录与账号体系</span></div>
+    <div class="op"><b>操作：</b>打开线上链接 → 登录页演示手机号+密码 / 验证码两种方式 → 点演示账号「🐰 林小满」进入。</div>
+    <div class="say" data-say><span class="lead">口播：</span>现在看到的是登录页。这里支持手机号加密码，也可以切换成验证码登录；忘记密码能在这里自助修改。为了节省时间，我直接点演示账号「林小满」进来。注意这条规则：只有完成学生认证、填上学号，才能发单和接单——这是平台防止虚假交易的第一道门槛。</div>
+  </div>
+
+  <!-- 3 -->
+  <div class="seg">
+    <div class="seg-head"><span class="time">00:55–02:00</span><span class="seg-title">电脑端大厅 · 导航滚动联动（重点）</span></div>
+    <div class="op"><b>操作：</b><ol><li>向下滚动 → 顶部导航变白、加阴影、略微变矮；</li><li>继续滚 → 指示条随分类平滑滑动；</li><li>点顶部「文档制作」标签 → 页面平滑滚到对应分区；</li><li>鼠标悬停委托卡 → 卡片轻微上浮。</li></ol></div>
+    <div class="say" data-say><span class="lead">口播：</span>进来就是委托大厅，先看电脑端。我向下滚动，注意顶部这条导航：它从透明变成白色、加了一点阴影，高度也略微收窄，这是吸顶态。继续往下滚，关键点来了——滚到哪个分类，导航下方的指示条就平滑滑到对应标签；反过来，我点上面的「文档制作」，页面会平滑滚到那一区。这个联动是用滚动位置实时算出当前分区，再用 transform 移动指示条实现的。鼠标悬停委托卡，卡片会轻微上浮。列表只显示待接单、且没过期的委托，数据全部来自真实状态层。</div>
+  </div>
+
+  <!-- 4 -->
+  <div class="seg">
+    <div class="seg-head"><span class="time">02:00–02:40</span><span class="seg-title">发布一条委托</span></div>
+    <div class="op"><b>操作：</b>点「＋ 发布」→ 类型选「代取代买」→ 填标题、地点、报酬、截止 → 提交。</div>
+    <div class="say" data-say><span class="lead">口播：</span>接下来发一条委托。点右上角「发布」，类型选「代取代买」，填上标题、地点、报酬和截止时间。这里有几道硬约束：报酬上限 200 元；接单方要交 50 到 200 元押金，且不低于报酬；含有「代考」「代写」这类违规词会被当场拦下。提交后委托立即上架，不需要人工前置审核——平台靠规则和信誉分来约束，而不是靠审批。</div>
+  </div>
+
+  <!-- 5 -->
+  <div class="seg">
+    <div class="seg-head"><span class="time">02:40–03:20</span><span class="seg-title">订单流转 + 个人中心</span></div>
+    <div class="op"><b>操作：</b>进「我的订单」看状态流转 → 进「我的」看立体卡片、按钮按下反馈、浏览记录入口。</div>
+    <div class="say" data-say><span class="lead">口播：</span>发布后来到「我的订单」。一条委托会经历待接单、已接单、待验收，到最后已完成，每一步都有状态记录。完成后押金原路返还；如果一方违约、申诉成立，会按冻结金额扣罚。再看个人中心，卡片有分层投影，按钮按下有细微反馈，还新增了浏览记录入口——这些交互质感，都是 AI 按我给的动效参数统一实现的。</div>
+  </div>
+
+  <!-- 6 -->
+  <div class="seg">
+    <div class="seg-head"><span class="time">03:20–03:50</span><span class="seg-title">手机端适配</span></div>
+    <div class="op"><b>操作：</b>手机打开同一链接 → 展示底部悬浮胶囊导航、薄荷绿椭圆胶囊选中、卡片点按上浮。</div>
+    <div class="say" data-say><span class="lead">口播：</span>再看手机端。同一个链接，用手机打开，布局自动切成单列卡片。底部是一条悬浮的胶囊导航，四个标签，选中的那个会套上一个浅薄荷绿的椭圆，滑过去；卡片点按也会轻微上浮。双端用的是同一套动效参数，只是表现形态按平台做了调整。</div>
+  </div>
+
+  <!-- 7 AI -->
+  <div class="seg">
+    <div class="seg-head"><span class="time">03:50–05:50</span><span class="seg-title"><span class="star">★</span> AI 协同过程复现（评分关键 · 2 分钟）</span></div>
+
+    <div class="op" style="margin-bottom:14px;"><b>录制提示：</b>这一段切到 AI 对话窗口。Prompt 用大字号贴出让观众看清；AI 返回后不要整屏滚代码，用鼠标圈出关键函数名，再口述「我为什么这样约束它」。</div>
+
+    <div style="font-weight:700;color:var(--blue-d);margin:8px 0 4px;">4.1　用 Prompt 生成核心模块（约 70 秒）</div>
+    <div class="op"><b>操作：</b>把下面 Prompt 原样输入 AI → 展示 AI 的方案与生成的代码（hall.vue 的分类分区、滑动指示条、滚动联动）。</div>
+    <div class="prompt" id="p1"><button class="cp" onclick="copyId('p1')">复制</button>把大厅改成「分类分区 + 滚动联动」：
+1）列表按分类分成多个区块，每个区块有标题和条数；
+2）顶部是一条吸顶导航，分类标签下面有一条滑动指示条；
+3）页面滚动到哪个区块，指示条就平滑滑到对应标签；
+4）点击标签，页面平滑滚动到对应区块；
+5）动效统一 ease-out、300ms，简约干净，禁止弹跳/回弹。
+只用真实数据，不要改数据层。</div>
+    <div class="say" data-say><span class="lead">口播：</span>第一段，我给 AI 一个明确的功能 Prompt。注意最后的约束——「只用真实数据，不要改数据层」。这就是我的工作方式：把边界画在前面，AI 只在边界内发挥。AI 收到后，新建了分类分组数据、一条滑动指示条，以及根据滚动位置激活标签的函数。整个过程我没有碰业务数据层，架构没有被改散。</div>
+    <div class="note"><b>圈给观众看：</b><code>sections</code> 分组、<code>.topbar-ind</code> 指示条、<code>updateActiveByScroll()</code>、<code>uni.pageScrollTo</code>。</div>
+
+    <div style="font-weight:700;color:var(--blue-d);margin:18px 0 4px;">4.2　引导 AI 修一个顽固 Bug（约 50 秒）</div>
+    <div class="op"><b>操作：</b>先现场演示 Bug（切到发布页导航消失、退出后点不动）→ 贴下面 Prompt → 展示 AI 定位与修复 → 现场验证。</div>
+    <div class="prompt" id="p2"><button class="cp" onclick="copyId('p2')">复制</button>发现两个 bug：
+1）底部导航切到「发布」时，导航栏会消失；
+2）从发布页退出后，底部导航卡住、点不动。
+我要的效果：点发布时底部导航不消失；
+发布页的「发布订单」按钮原本固定在底部，现在要和其他内容一样随滚动移动；
+离开发布后导航也能正常点。</div>
+    <div class="say" data-say><span class="lead">口播：</span>第二段展示怎么引导 AI 修 Bug。我先描述现象和我想要的效果，不替它猜原因。AI 自己定位到两处根因：发布页忘了挂载底部导航组件；以及导航内部有个「跳转中」的锁，用 navigateTo 打开后旧页面残留、锁没复位，所以退出后卡死。修复是补上导航、把按钮改成随内容滚动、跳转统一用 reLaunch 并在回调里复位锁。现在现场验证：大厅、发布、我的，来回切换都正常——这就是「一正一修」的协作闭环。</div>
+    <div class="note"><b>圈给观众看：</b><code>&lt;TabBar&gt;</code> 挂载、<code>.submit-inline</code>、<code>uni.reLaunch</code>、<code>navigating</code> 复位。</div>
+  </div>
+
+  <!-- 8 -->
+  <div class="seg">
+    <div class="seg-head"><span class="time">05:50–06:40</span><span class="seg-title">技术架构速讲</span></div>
+    <div class="op"><b>画面：</b>代码目录或预先画好的架构图，不用现场敲。</div>
+    <div class="say" data-say><span class="lead">口播：</span>快速过一下架构。前端是 uni-app 加 Vue3，用 Vite 构建，可以打包成一个单文件 HTML，双击打开、离线可用；数据层是 store，负责所有业务状态和规则校验；sync 层做跨浏览器同步，把 sharecode 透传到后端；后端是轻量的 Node 服务，JSON 文件存储，用 HMAC 签名的无状态令牌。我给 AI 的边界始终是一致的：只改页面和组件，数据层由我把关，设计令牌统一——这样 AI 改得再快，也不会把架构改散。</div>
+  </div>
+
+  <!-- 9 -->
+  <div class="seg">
+    <div class="seg-head"><span class="time">06:40–07:20</span><span class="seg-title">10 分钟极速复现</span></div>
+    <div class="op"><b>操作：</b>终端演示 git clone → npm install → npm run dev:h5 → 打开本地地址；再展示 npm run build:single 出单文件。</div>
+    <div class="say" data-say><span class="lead">口播：</span>最后是复现。仓库是公开的，克隆下来，执行 npm install、npm run dev:h5，打开本地地址就能跑；或者执行 npm run build:single，生成一个单文件 HTML，双击即用、离线可跑。README 里有十分钟极速复现的完整步骤，环境配置和依赖也都写清楚了。</div>
+  </div>
+
+  <!-- 10 -->
+  <div class="seg">
+    <div class="seg-head"><span class="time">07:20–07:30</span><span class="seg-title">收尾</span></div>
+    <div class="op"><b>画面：</b>回到项目首页或标题页。</div>
+    <div class="say" data-say><span class="lead">口播：</span>人定方向与边界，AI 负责落地；过程可追溯，结果可复现。以上就是《校园委托》的全部演示，感谢观看。</div>
+  </div>
+
+  <div class="chk">
+    <h3>录制前检查清单</h3>
+    <label>☐ 演示账号已登录、数据正常（11 条委托）</label>
+    <label>☐ 线上链接可访问，或本地服务已启动（双击 server/启动.bat）</label>
+    <label>☐ 录屏 1920×1080、帧率 ≥30fps，MP4 导出</label>
+    <label>☐ 麦克风正常、环境安静；系统音与麦克风同录</label>
+    <label>☐ AI 对话窗口已打开并登录（用于 4.1 / 4.2 段现场输入）</label>
+    <label>☐ 把本页放大或打印当提词稿；AI 协同段实际时长 ≥2 分钟</label>
+    <label>☐ 成片命名：校园委托-演示视频.mp4，控制在 5–8 分钟</label>
+  </div>
+
+</div>
+
+<script>
+function getText(){
+  return [...document.querySelectorAll('[data-say]')].map((el,i)=>(i+1)+'. '+el.innerText.replace(/^口播：\s*/,'')).join('\n\n');
+}
+function copyAll(){
+  navigator.clipboard.writeText(getText()).then(()=>alert('全文台词已复制，可粘贴到提词器'))
+    .catch(()=>fallback(getText()));
+}
+function copyId(id){
+  const t=document.getElementById(id).innerText.replace(/^复制\n/,'');
+  navigator.clipboard.writeText(t).then(()=>alert('Prompt 已复制')).catch(()=>fallback(t));
+}
+function fallback(t){
+  const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta);
+  ta.select(); document.execCommand('copy'); ta.remove(); alert('已复制');
+}
+</script>
+</body>
+</html>
